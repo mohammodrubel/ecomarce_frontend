@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import tv from '../assts/tv.png'
 import Image from "next/image"
 
 export function SpecialOffer() {
@@ -63,7 +64,7 @@ export function SpecialOffer() {
         <div className="bg-white/10 rounded-lg p-4">
           <div className="relative mb-3">
             <Image
-              src="/placeholder.svg?height=120&width=200"
+              src={tv}
               alt="65 UHD 4K Smart TV"
               width={200}
               height={120}
