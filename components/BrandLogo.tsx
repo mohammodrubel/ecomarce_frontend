@@ -16,7 +16,7 @@ function BrandLogo() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold mb-4">Trusted Brands</h2>
-            <p className="text-gray-600">We partner with the world's leading brands</p>
+            <p className="text-gray-600">We partner with the worlds leading brands</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">

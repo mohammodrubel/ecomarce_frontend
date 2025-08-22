@@ -29,7 +29,7 @@ function CustomerTestimonials() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">What Our Customers Say</h2>
-            <p className="text-gray-600">Don't just take our word for it</p>
+            <p className="text-gray-600">Dont just take our word for it</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -44,7 +44,7 @@ function CustomerTestimonials() {
                       />
                     ))}
                   </div>
-                  <p className="text-gray-600 mb-4">"{testimonial.comment}"</p>
+                  <p className="text-gray-600 mb-4">{testimonial.comment}</p>
                   <div className="flex items-center gap-3">
                     <Image
                       src={testimonial.image || "/placeholder.svg"}

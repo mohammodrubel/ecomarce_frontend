@@ -36,7 +36,7 @@ export function SpecialOffer() {
   return (
     <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white border-0">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Special Offer of The Day</CardTitle>
+        <CardTitle className="text-xl font-bold">Special Offer</CardTitle>
         <p className="text-orange-100 text-sm">Limited stock, buy before they run out!</p>
       </CardHeader>
       <CardContent className="space-y-4">

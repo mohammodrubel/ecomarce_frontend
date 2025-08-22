@@ -54,23 +54,23 @@ const categories: Category[] = [
     icon: "📱",
     subcategories: ["iPad", "Android Tablets", "Windows Tablets", "Drawing Tablets", "Kids Tablets"],
   },
-  {
-    name: "TV&AV",
-    icon: "📺",
-    subcategories: ["Smart TVs", "4K TVs", "OLED TVs", "QLED TVs", "AV Receivers", "Streaming Devices"],
-  },
-  {
-    name: "Watches",
-    icon: "⌚",
-    subcategories: ["Smartwatches", "Fitness Trackers", "Luxury Watches", "Sports Watches", "Kids Watches"],
-  },
+  // {
+  //   name: "TV&AV",
+  //   icon: "📺",
+  //   subcategories: ["Smart TVs", "4K TVs", "OLED TVs", "QLED TVs", "AV Receivers", "Streaming Devices"],
+  // },
+  // {
+  //   name: "Watches",
+  //   icon: "⌚",
+  //   subcategories: ["Smartwatches", "Fitness Trackers", "Luxury Watches", "Sports Watches", "Kids Watches"],
+  // },
 ]
 
 function DesktopSidebar() {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
 
   return (
-    <aside className="relative w-64 bg-white shadow-lg min-h-[500px] hidden lg:block rounded-lg">
+    <aside className="relative w-64 bg-white shadow-lg min-h-auto hidden lg:block rounded-lg">
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-4 px-2">Categories</h2>
         {categories.map((category) => (

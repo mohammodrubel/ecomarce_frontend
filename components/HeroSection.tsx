@@ -22,7 +22,7 @@ function HeroSection() {
                       MacBook Pro 14 and 16
                     </h1>
                     <p className="text-lg mb-8 text-gray-200 leading-relaxed">
-                      Just trade in your eligible computer for credit toward a new one or recycle it for free. It's good for you
+                      Just trade in your eligible computer for credit toward a new one or recycle it for free. Its good for you
                       and the planet.*
                     </p>
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
