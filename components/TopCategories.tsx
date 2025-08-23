@@ -72,7 +72,7 @@ function TopCategories() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 gap-6">
           {mainData?.map((category: Category) => (
             <Card
-              key={category.id}
+              key={category.name}
               className="hover:shadow-lg transition-shadow cursor-pointer"
             >
               <CardContent className="text-center">
@@ -84,7 +84,6 @@ function TopCategories() {
                   className="mx-auto mb-4"
                 />
                 <h3 className="font-semibold mb-2">{category.name}</h3>
-                {/* <p className="text-sm text-gray-500">{category.count}</p> */}
               </CardContent>
             </Card>
           ))}
