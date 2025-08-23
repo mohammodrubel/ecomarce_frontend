@@ -54,8 +54,8 @@ const menuItems = [
     title: "Products",
     icon: Package,
     items: [
-      { title: "All Products", url: "/admin/products" },
-      { title: "Add Product", url: "/admin/products/add" },
+      { title: "All Products", url: "/dashboard/all-product" },
+      { title: "Add Products", url: "/dashboard/add-product" },
     ],
   },
   {
