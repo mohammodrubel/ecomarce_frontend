@@ -1,51 +1,63 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { Plus, X, Upload, ImageIcon } from "lucide-react";
+import { useAddNewCategoryMutation } from "@/redux/fetchers/categoryApi/categoryApi";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-interface Category {
-  id: string;
-  name: string;
-  icon?: string;
-  subcategories: string[];
+interface AddCategoryProps {
+  onSuccess?: () => void;
 }
 
-export default function Page() {
+export default function AddCategory({ onSuccess }: AddCategoryProps) {
   const [categoryName, setCategoryName] = useState("");
-  const [icon, setIcon] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [newSubcategory, setNewSubcategory] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [addNewCategory, { isLoading }] = useAddNewCategoryMutation();
+  const router = useRouter();
 
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const editId = searchParams.get("edit");
-    if (editId) {
-      fetchCategoryForEdit(editId);
-    }
-  }, [searchParams]);
-
-  const fetchCategoryForEdit = async (id: string) => {
-    try {
-      const response = await fetch(`/api/categories/${id}`);
-      if (response.ok) {
-        const category = await response.json();
-        setEditingCategory(category);
-        setCategoryName(category.name);
-        setIcon(category.icon || "");
-        setSubcategories(category.subcategories || []);
+  // --- Image Upload Handling ---
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check if file is an image
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
       }
-    } catch (error) {
-      console.error("Failed to fetch category for editing", error);
+
+      setImageFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -82,44 +94,32 @@ export default function Page() {
   // --- Submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!categoryName.trim()) return;
 
-    setIsLoading(true);
+    const formData = new FormData();
+    const data = {
+      name: categoryName,
+      subcategories: subcategories,
+    };
+
+    formData.append("data", JSON.stringify(data));
+
+    if (imageFile) {
+      formData.append("file", imageFile);
+    }
 
     try {
-      const url = editingCategory
-        ? `/api/categories/${editingCategory.id}`
-        : "/api/categories";
-      const method = editingCategory ? "PUT" : "POST";
+      const response = await addNewCategory(formData).unwrap();
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: categoryName.trim(),
-          icon: icon.trim(),
-          subcategories: subcategories,
-        }),
-      });
+      if (response.success) {
+        toast.success(response.message);
 
-      if (response.ok) {
         setCategoryName("");
-        setIcon("");
         setSubcategories([]);
-        setNewSubcategory("");
-        setEditingCategory(null);
-        window.location.href = "/categories";
-      } else {
-        throw new Error(
-          `Failed to ${editingCategory ? "update" : "create"} category`
-        );
+        setImageFile(null);
+        router.push("/dashboard/all-categories");
       }
-    } catch (error) {
-      console.error("Error submitting category", error);
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      console.log(error?.data?.message || "Something went wrong");
     }
   };
 
@@ -128,16 +128,12 @@ export default function Page() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-6">
-            <h1 className="text-3xl font-bold">
-              {editingCategory ? "Edit Category" : "Add New Category"}
-            </h1>
+            <h1 className="text-3xl font-bold">Add New Category</h1>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>
-                {editingCategory ? "Edit Category" : "Create Category"}
-              </CardTitle>
+              <CardTitle>Create Category</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -153,15 +149,59 @@ export default function Page() {
                   />
                 </div>
 
-                {/* Icon */}
-                <div className="space-y-2">
-                  <Label htmlFor="icon">Icon (optional)</Label>
-                  <Input
-                    id="icon"
-                    value={icon}
-                    onChange={(e) => setIcon(e.target.value)}
-                    placeholder="Enter icon URL or emoji"
+                {/* Image Upload */}
+                <div className="space-y-4">
+                  <Label>Category Image (optional)</Label>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
                   />
+
+                  {imagePreview ? (
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="h-40 w-full object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={triggerFileInput}
+                        className="mt-2"
+                      >
+                        Change Image
+                      </Button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={triggerFileInput}
+                      className="border-2 border-dashed rounded-md p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          Click to upload an image
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF up to 5MB
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Subcategories */}
@@ -213,13 +253,7 @@ export default function Page() {
 
                 {/* Submit */}
                 <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading
-                    ? editingCategory
-                      ? "Updating..."
-                      : "Creating..."
-                    : editingCategory
-                    ? "Update Category"
-                    : "Create Category"}
+                  {isLoading ? "Creating..." : "Create Category"}
                 </Button>
               </form>
             </CardContent>
