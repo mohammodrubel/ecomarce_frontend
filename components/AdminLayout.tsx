@@ -1,5 +1,4 @@
 import type React from "react";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -14,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { AdminSidebar } from "./AdminSidebar";
 
 export default function AdminLayout({
   children,

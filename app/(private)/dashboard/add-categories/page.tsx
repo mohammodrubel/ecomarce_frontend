@@ -12,16 +12,14 @@ import { useAddNewCategoryMutation } from "@/redux/fetchers/categoryApi/category
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-interface AddCategoryProps {
-  onSuccess?: () => void;
-}
 
-export default function AddCategory({ onSuccess }: AddCategoryProps) {
-  const [categoryName, setCategoryName] = useState("");
+
+export default function AddCategory() {
+  const [categoryName, setCategoryName] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [subcategories, setSubcategories] = useState<string[]>([]);
-  const [newSubcategory, setNewSubcategory] = useState("");
+  const [newSubcategory, setNewSubcategory] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [addNewCategory, { isLoading }] = useAddNewCategoryMutation();
   const router = useRouter();
@@ -95,9 +93,15 @@ export default function AddCategory({ onSuccess }: AddCategoryProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!categoryName.trim()) {
+      toast.error("Category name is required");
+      return;
+    }
+
     const formData = new FormData();
     const data = {
-      name: categoryName,
+      name: categoryName.trim(),
       subcategories: subcategories,
     };
 
@@ -113,13 +117,19 @@ export default function AddCategory({ onSuccess }: AddCategoryProps) {
       if (response.success) {
         toast.success(response.message);
 
+        // Reset form
         setCategoryName("");
         setSubcategories([]);
         setImageFile(null);
+        setImagePreview(null);
+
+       
+        // Navigate to categories page
         router.push("/dashboard/all-categories");
       }
     } catch (error: any) {
-      console.log(error?.data?.message || "Something went wrong");
+      console.error("Error creating category:", error);
+      toast.error(error?.data?.message || "Something went wrong");
     }
   };
 
