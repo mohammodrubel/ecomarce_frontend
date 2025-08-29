@@ -5,10 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, DollarSign, Star, UndoIcon } from "lucide-react";
-import { RichTextEditor } from "@/components/Editor";
+import { DollarSign } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -87,32 +84,34 @@ export default function EditProductPage() {
     inStock: true,
   });
 
-useEffect(() => {
-  if (data?.data) {
-    setFormData({
-      name: data?.data.name || "",
-      description: data?.data.description || "",
-      price: data?.data.price?.toString() || "",
-      originalPrice: data?.data.originalPrice?.toString() || "",
-      discountType: data?.data.discountType || "",
-      discountValue: data?.data.discountValue?.toString() || "",
-      discountStart: data?.data.discountStart
-        ? data?.data.discountStart.split("T")[0]
-        : "",
-      discountEnd: data?.data.discountEnd ? data.data.discountEnd : "",
-      stock: data?.data.stock?.toString() || "",
-      sku: data?.data.sku || "",
-      brandId: data?.data.brandId || "",
-      categoryId: data?.data.categoryId || "",
-      // ✅ force to string, never undefined/null
-      subcategory: data?.data.subcategory ?? "",
-      rating: data?.data.rating?.toString() || "",
-      reviewsCount: data?.data.reviewsCount?.toString() || "",
-      badge: data?.data.badge || "",
-      inStock: data?.data.inStock ?? true,
-    });
-  }
-}, [data]);
+  useEffect(() => {
+    if (data?.data) {
+      setFormData({
+        name: data?.data.name || "",
+        description: data?.data.description || "",
+        price: data?.data.price?.toString() || "",
+        originalPrice: data?.data.originalPrice?.toString() || "",
+        discountType: data?.data.discountType || "",
+        discountValue: data?.data.discountValue?.toString() || "",
+        discountStart: data?.data.discountStart
+          ? data?.data.discountStart.split("T")[0]
+          : "",
+        discountEnd: data?.data.discountEnd
+          ? data?.data.discountEnd.split("T")[0]
+          : "",
+        stock: data?.data.stock?.toString() || "",
+        sku: data?.data.sku || "",
+        brandId: data?.data.brandId || "",
+        categoryId: data?.data.categoryId || "",
+        subcategory: data?.data.subcategory ?? "",
+        rating: data?.data.rating?.toString() || "",
+        reviewsCount: data?.data.reviewsCount?.toString() || "",
+        badge: data?.data.badge || "",
+        inStock: data?.data.inStock ?? true,
+      });
+    }
+  }, [data]);
+
   const handleInputChange = useCallback(
     (
       field: keyof FormData,
@@ -213,7 +212,7 @@ useEffect(() => {
               <div className="space-y-2">
                 <Label>Subcategory *</Label>
                 <Select
-                  value={formData.subcategory} // controlled only
+                  value={formData.subcategory}
                   onValueChange={(val) => handleInputChange("subcategory", val)}
                   disabled={!formData.categoryId}
                 >
@@ -278,6 +277,7 @@ useEffect(() => {
             </div>
           </CardContent>
         </Card>
+
         {/* Discount Section */}
         <div className="pt-4 border-t">
           <h3 className="text-lg font-medium mb-4">Discount Settings</h3>
@@ -340,6 +340,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
+
         <div className="flex justify-end gap-4">
           <Button type="submit" className="min-w-32">
             Update
