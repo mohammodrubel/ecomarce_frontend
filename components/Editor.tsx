@@ -320,7 +320,7 @@ export function RichTextEditor({
 
       {/* Editor Content */}
       <div className="min-h-[200px] [&_.ProseMirror]:min-h-[200px] [&_.ProseMirror]:outline-none [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-4 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-4">
-        <EditorContent editor={editor} placeholder={placeholder} />
+        <EditorContent editor={editor}  placeholder={placeholder} />
       </div>
     </div>
   );

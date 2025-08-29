@@ -23,11 +23,33 @@ import { useGetAllBrandQuery } from "@/redux/fetchers/brand/brandApi";
 import { useAddNewProductMutation } from "@/redux/fetchers/products/productsApi";
 import { toast } from "sonner";
 
+// ProductType enum from your schema
+enum ProductType {
+  HOT = "HOT",
+  NEW = "NEW",
+  UPCOMING = "UPCOMING",
+  SALE = "SALE",
+  FEATURED = "FEATURED",
+  LIMITED = "LIMITED",
+  TRENDING = "TRENDING",
+  EXCLUSIVE = "EXCLUSIVE",
+}
+
+// DiscountType enum from your schema
+enum DiscountType {
+  FLAT = "FLAT",
+  PERCENTAGE = "PERCENTAGE",
+}
+
 interface FormData {
   name: string;
   description: string;
   price: string;
   originalPrice: string;
+  discountType: DiscountType | "";
+  discountValue: string;
+  discountStart: string;
+  discountEnd: string;
   stock: string;
   sku: string;
   brandId: string;
@@ -35,7 +57,7 @@ interface FormData {
   subcategory: string;
   rating: string;
   reviewsCount: string;
-  badge: string;
+  badge: ProductType | "";
   inStock: boolean;
 }
 
@@ -78,6 +100,10 @@ export default function ProductUploadPage() {
     description: "",
     price: "",
     originalPrice: "",
+    discountType: "",
+    discountValue: "",
+    discountStart: "",
+    discountEnd: "",
     stock: "",
     sku: "",
     brandId: "",
@@ -90,7 +116,10 @@ export default function ProductUploadPage() {
   });
 
   const handleInputChange = useCallback(
-    (field: keyof FormData, value: string | boolean) => {
+    (
+      field: keyof FormData,
+      value: string | boolean | DiscountType | ProductType
+    ) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
     },
     []
@@ -114,23 +143,111 @@ export default function ProductUploadPage() {
       return;
     }
 
+    if (!formData.sku.trim()) {
+      toast.error("SKU is required");
+      return;
+    }
+
+    if (!formData.brandId) {
+      toast.error("Brand is required");
+      return;
+    }
+
+    if (!formData.categoryId) {
+      toast.error("Category is required");
+      return;
+    }
+
+    if (!formData.subcategory.trim()) {
+      toast.error("Subcategory is required");
+      return;
+    }
+
     if (images.length === 0) {
       toast.error("At least one product image is required");
       return;
     }
 
+    // Validate discount dates
+    if (formData.discountStart && formData.discountEnd) {
+      const startDate = new Date(formData.discountStart);
+      const endDate = new Date(formData.discountEnd);
+
+      if (endDate <= startDate) {
+        toast.error("Discount end date must be after start date");
+        return;
+      }
+    }
+
+    // Validate discount values
+    if (formData.discountType && !formData.discountValue) {
+      toast.error("Discount value is required when discount type is selected");
+      return;
+    }
+
+    if (formData.discountValue) {
+      const discountValue = parseFloat(formData.discountValue);
+      if (discountValue <= 0) {
+        toast.error("Discount value must be greater than 0");
+        return;
+      }
+
+      if (
+        formData.discountType === DiscountType.PERCENTAGE &&
+        discountValue > 100
+      ) {
+        toast.error("Discount percentage cannot exceed 100%");
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
+      // Calculate final price based on discount
+      const originalPrice = formData.originalPrice
+        ? parseFloat(formData.originalPrice)
+        : parseFloat(formData.price);
+
+      let finalPrice = parseFloat(formData.price);
+
+      // Apply discount if specified
+      if (formData.discountType && formData.discountValue) {
+        const discountValue = parseFloat(formData.discountValue);
+
+        if (formData.discountType === DiscountType.FLAT) {
+          finalPrice = originalPrice - discountValue;
+          if (finalPrice < 0) finalPrice = 0;
+        } else if (formData.discountType === DiscountType.PERCENTAGE) {
+          finalPrice = originalPrice - (originalPrice * discountValue) / 100;
+        }
+      }
+
       const payload = new FormData();
       const productData = {
-        ...formData,
-        price: parseFloat(formData.price) || 0,
-        originalPrice:
-          parseFloat(formData.originalPrice) || parseFloat(formData.price) || 0,
+        name: formData.name,
+        description: formData.description,
+        price: finalPrice,
+        originalPrice: originalPrice,
+        discountType: formData.discountType || null,
+        discountValue: formData.discountValue
+          ? parseFloat(formData.discountValue)
+          : null,
+        discountStart: formData.discountStart
+          ? new Date(formData.discountStart)
+          : null,
+        discountEnd: formData.discountEnd
+          ? new Date(formData.discountEnd)
+          : null,
         stock: parseInt(formData.stock) || 0,
+        sku: formData.sku,
+        brandId: formData.brandId,
+        categoryId: formData.categoryId,
+        subcategory: formData.subcategory,
         rating: parseFloat(formData.rating) || 0,
         reviewsCount: parseInt(formData.reviewsCount) || 0,
+        badge: formData.badge || null,
+        inStock: formData.inStock,
       };
 
       payload.append("data", JSON.stringify(productData));
@@ -140,13 +257,15 @@ export default function ProductUploadPage() {
 
       if (response?.success) {
         toast.success(response.message || "Product uploaded successfully");
-
-        // Reset form
         setFormData({
           name: "",
           description: "",
           price: "",
           originalPrice: "",
+          discountType: "",
+          discountValue: "",
+          discountStart: "",
+          discountEnd: "",
           stock: "",
           sku: "",
           brandId: "",
@@ -176,7 +295,6 @@ export default function ProductUploadPage() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Add New Product</h1>
-
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Product Images */}
         <Card>
@@ -218,24 +336,27 @@ export default function ProductUploadPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sku">SKU (Stock Keeping Unit)</Label>
+                <Label htmlFor="sku">SKU *</Label>
                 <Input
                   id="sku"
                   value={formData.sku}
                   onChange={(e) => handleInputChange("sku", e.target.value)}
                   placeholder="Product SKU"
+                  required
                   disabled={isLoading}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Brand */}
               <div className="space-y-2">
-                <Label>Brand</Label>
+                <Label>Brand *</Label>
                 <Select
                   onValueChange={(val) => handleInputChange("brandId", val)}
                   value={formData.brandId}
                   disabled={isLoading || isBrandLoading}
+                  required
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
@@ -254,8 +375,9 @@ export default function ProductUploadPage() {
                 </Select>
               </div>
 
+              {/* Category */}
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>Category *</Label>
                 <Select
                   onValueChange={(val) => {
                     handleInputChange("categoryId", val);
@@ -263,6 +385,7 @@ export default function ProductUploadPage() {
                   }}
                   value={formData.categoryId}
                   disabled={isLoading || isCategoryLoading}
+                  required
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
@@ -283,29 +406,33 @@ export default function ProductUploadPage() {
                 </Select>
               </div>
 
-              
-                <div className="space-y-2">
-                  <Label>Subcategory</Label>
-                  <Select
-                    onValueChange={(val) =>
-                      handleInputChange("subcategory", val)
-                    }
-                    value={formData.subcategory}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select subcategory" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedCategory?.subcategories.map((sub,idx) => (
-                        <SelectItem key={idx} value={sub}>
-                          {sub}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              
+              {/* Subcategory */}
+              <div className="space-y-2">
+                <Label>Subcategory *</Label>
+                <Select
+                  onValueChange={(val) => handleInputChange("subcategory", val)}
+                  value={formData.subcategory}
+                  disabled={isLoading || !formData.categoryId}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        !formData.categoryId
+                          ? "Select category first"
+                          : "Select subcategory"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedCategory?.subcategories.map((sub, idx) => (
+                      <SelectItem key={idx} value={sub}>
+                        {sub}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -326,7 +453,7 @@ export default function ProductUploadPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Price *</Label>
                 <Input
@@ -350,27 +477,102 @@ export default function ProductUploadPage() {
                     handleInputChange("originalPrice", e.target.value)
                   }
                   disabled={isLoading}
+                  placeholder="Same as price if empty"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Stock Quantity</Label>
+                <Label>Stock Quantity *</Label>
                 <Input
                   type="number"
                   min="0"
                   value={formData.stock}
                   onChange={(e) => handleInputChange("stock", e.target.value)}
+                  required
                   disabled={isLoading}
                 />
               </div>
+              <div className="space-y-2 flex items-end">
+                <div className="flex items-center space-x-2 w-full">
+                  <Switch
+                    id="inStock"
+                    checked={formData.inStock}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("inStock", checked)
+                    }
+                    disabled={isLoading}
+                  />
+                  <Label htmlFor="inStock">In Stock</Label>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={formData.inStock}
-                onCheckedChange={(val) => handleInputChange("inStock", val)}
-                disabled={isLoading}
-              />
-              <Label>Product is in stock</Label>
+            {/* Discount Section */}
+            <div className="pt-4 border-t">
+              <h3 className="text-lg font-medium mb-4">Discount Settings</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Discount Type</Label>
+                  <Select
+                    onValueChange={(val) =>
+                      handleInputChange("discountType", val as DiscountType)
+                    }
+                    value={formData.discountType}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DiscountType.FLAT}>
+                        Flat Amount
+                      </SelectItem>
+                      <SelectItem value={DiscountType.PERCENTAGE}>
+                        Percentage
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Discount Value</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.discountValue}
+                    onChange={(e) =>
+                      handleInputChange("discountValue", e.target.value)
+                    }
+                    disabled={isLoading || !formData.discountType}
+                    placeholder={
+                      formData.discountType === DiscountType.PERCENTAGE
+                        ? "0-100%"
+                        : "Amount"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Discount Start Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.discountStart}
+                    onChange={(e) =>
+                      handleInputChange("discountStart", e.target.value)
+                    }
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Discount End Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.discountEnd}
+                    onChange={(e) =>
+                      handleInputChange("discountEnd", e.target.value)
+                    }
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -409,12 +611,24 @@ export default function ProductUploadPage() {
             </div>
             <div className="space-y-2">
               <Label>Badge</Label>
-              <Input
+              <Select
+                onValueChange={(val) =>
+                  handleInputChange("badge", val as ProductType)
+                }
                 value={formData.badge}
-                onChange={(e) => handleInputChange("badge", e.target.value)}
-                placeholder="e.g., New, Sale"
                 disabled={isLoading}
-              />
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a badge" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(ProductType).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0) + type.slice(1).toLowerCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {formData.badge && (
                 <div className="mt-2">
                   <Badge variant="secondary">{formData.badge}</Badge>
@@ -434,6 +648,10 @@ export default function ProductUploadPage() {
                 description: "",
                 price: "",
                 originalPrice: "",
+                discountType: "",
+                discountValue: "",
+                discountStart: "",
+                discountEnd: "",
                 stock: "",
                 sku: "",
                 brandId: "",

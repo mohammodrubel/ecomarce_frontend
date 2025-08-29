@@ -56,6 +56,7 @@ const menuItems = [
     items: [
       { title: "All Products", url: "/dashboard/all-product" },
       { title: "Add Products", url: "/dashboard/add-product" },
+      { title: "Edit Products", url: "/dashboard/edit-product" },
     ],
   },
   {
@@ -71,8 +72,8 @@ const menuItems = [
     title: "Brand", // ← new section
     icon: Package,
     items: [
-      { title: "All Brands", url: "/admin/brands" },
-      { title: "Add Brand", url: "/admin/brands/add" },
+      { title: "All Brands", url: "/dashboard/brand" },
+      { title: "Add Brand", url: "/dashboard/add-brand" },
     ],
   },
   {
