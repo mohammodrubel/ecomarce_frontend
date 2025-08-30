@@ -1,9 +1,20 @@
 import { baseApi } from "@/redux/api/baseApi";
 import { tagTypes } from "@/redux/TagTypes";
 
+// Brand type
+export interface Brand {
+  id: string;
+  logo: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const BrandApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    addNewBrand: builder.mutation({
+    // Add new brand
+    addNewBrand: builder.mutation<Brand, Partial<Brand>>({
       query: (data) => ({
         url: `/brand`,
         method: "POST",
@@ -12,6 +23,7 @@ export const BrandApi = baseApi.injectEndpoints({
       invalidatesTags: [tagTypes.brand],
     }),
 
+    // Update brand info
     updateBrand: builder.mutation({
       query: ({ id, data }) => ({
         url: `/brand/${id}`,
@@ -21,7 +33,8 @@ export const BrandApi = baseApi.injectEndpoints({
       invalidatesTags: [tagTypes.brand],
     }),
 
-    getAllBrand: builder.query({
+    // Get all brands
+    getAllBrand: builder.query<{ data: Brand[] }, void>({
       query: () => ({
         url: "/brand",
         method: "GET",
@@ -29,7 +42,18 @@ export const BrandApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.brand],
     }),
 
-    getSingleBrand: builder.query({
+    // Update only brand logo
+    updateBrandImage: builder.mutation<Brand, { id: string; data: FormData }>({
+      query: ({ id, data }) => ({
+        url: `/brand/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: [tagTypes.brand],
+    }),
+
+    // Get single brand
+    getSingleBrand: builder.query<Brand, string>({
       query: (id) => ({
         url: `/brand/${id}`,
         method: "GET",
@@ -37,7 +61,8 @@ export const BrandApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.brand],
     }),
 
-    DeleteBrand: builder.mutation({
+    // Delete brand
+    deleteBrand: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
         url: `/brand/${id}`,
         method: "DELETE",
@@ -49,8 +74,9 @@ export const BrandApi = baseApi.injectEndpoints({
 
 export const {
   useAddNewBrandMutation,
-  useUpdateBrandMutation, 
+  useUpdateBrandMutation,
   useGetAllBrandQuery,
   useGetSingleBrandQuery,
-  useDeleteBrandMutation
+  useDeleteBrandMutation,
+  useUpdateBrandImageMutation,
 } = BrandApi;
