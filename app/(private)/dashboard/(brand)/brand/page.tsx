@@ -31,9 +31,7 @@ import {
 } from "@/redux/fetchers/brand/brandApi";
 import { toast } from "sonner";
 
-// ====================
-// Edit Brand Modal
-// ====================
+
 function EditBrandModal({
   item,
   onSave,
@@ -57,12 +55,13 @@ function EditBrandModal({
         const formData = new FormData();
         formData.append("file", e.target.files[0]);
 
-        const updated = await changeBrandImage({
+        const updated:any = await changeBrandImage({
           id: item.id,
           data: formData,
         }).unwrap();
+
         toast.success(updated?.message);
-        onSave(updated);
+        onSave(updated.data); // ✅ only pass Brand
       } catch (error) {
         console.error("Failed to update brand logo:", error);
       }
@@ -73,16 +72,17 @@ function EditBrandModal({
   const handleUpdate = async () => {
     const data = {
       name,
-      description
-    }
+      description,
+    };
 
     try {
-      const updated = await updateBrandInformation({
+      const updated: any = await updateBrandInformation({
         id: item.id,
-        data: data,
+        data,
       }).unwrap();
-      toast.success(updated?.message)
-      onSave(updated);
+
+      toast.success(updated?.message);
+      onSave(updated.data); 
       setIsOpen(false);
     } catch (error) {
       console.error("Failed to update brand:", error);

@@ -3,6 +3,8 @@ import { tagTypes } from "@/redux/TagTypes";
 
 // Brand type
 export interface Brand {
+  message(message: any): unknown;
+  data(data: any): unknown;
   id: string;
   logo: string;
   name: string;
