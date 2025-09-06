@@ -30,6 +30,7 @@ import {
   Brand,
 } from "@/redux/fetchers/brand/brandApi";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 
 function EditBrandModal({
@@ -46,6 +47,7 @@ function EditBrandModal({
   const [description, setDescription] = useState(item.description);
   const [isOpen, setIsOpen] = useState(false);
 
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Handle logo upload
@@ -61,7 +63,7 @@ function EditBrandModal({
         }).unwrap();
 
         toast.success(updated?.message);
-        onSave(updated.data); // ✅ only pass Brand
+        onSave(updated.data); 
       } catch (error) {
         console.error("Failed to update brand logo:", error);
       }
@@ -84,6 +86,7 @@ function EditBrandModal({
       toast.success(updated?.message);
       onSave(updated.data); 
       setIsOpen(false);
+     
     } catch (error) {
       console.error("Failed to update brand:", error);
     }

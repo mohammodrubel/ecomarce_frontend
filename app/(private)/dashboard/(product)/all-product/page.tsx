@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import { MoreHorizontal, Trash, Eye, Plus, Pencil } from "lucide-react";
-import { useGetAllProductsQuery } from "@/redux/fetchers/products/productsApi";
+import { useDeleteProductMutation, useGetAllProductsQuery } from "@/redux/fetchers/products/productsApi";
 import { Product } from "@/lib/Types";
 import Link from "next/link";
 import {
@@ -35,16 +35,16 @@ export default function ProductTable() {
   const { isLoading, isError, data } = useGetAllProductsQuery(undefined);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const [deleteProduct] = useDeleteProductMutation()
 
   const handleView = (product: Product) => {
     setViewingProduct(product);
     setIsViewDialogOpen(true);
   };
 
-  const handleDelete = (productId: string) => {
-    // Implement your delete logic here
-    console.log("Deleting product:", productId);
-    // dispatch(deleteProduct(productId)) etc.
+  const handleDelete = async(productId: string) => {
+      const res = await deleteProduct(productId)
+      console.log(res)
   };
 
   if (isLoading) return <div>Loading...</div>;
