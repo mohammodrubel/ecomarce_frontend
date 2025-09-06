@@ -64,7 +64,6 @@ const menuItems = [
     items: [
       { title: "All Categories", url: "/dashboard/all-categories" },
       { title: "Add Category", url: "/dashboard/add-categories" },
-      { title: "Edit Category", url: "/dashboard/edit-categories" },
     ],
   },
   {

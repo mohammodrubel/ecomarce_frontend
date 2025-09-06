@@ -64,3 +64,15 @@ export interface Product {
     updatedAt: string;
   };
 }
+export type BrandInfo = {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl?: string;
+};
+
+export type BrandResponse = {
+  success: boolean;
+  message: string;
+  data?: BrandInfo;
+};

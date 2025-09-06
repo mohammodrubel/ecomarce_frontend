@@ -166,7 +166,7 @@ export default function Page() {
   const { data: brandsData, isLoading, error, refetch } = useGetAllBrandQuery();
   const [deleteBrand] = useDeleteBrandMutation();
   const [items, setItems] = useState<Brand[]>([]);
-
+console.log('brand info')
   useEffect(() => {
     if (brandsData?.data) {
       setItems(brandsData.data);

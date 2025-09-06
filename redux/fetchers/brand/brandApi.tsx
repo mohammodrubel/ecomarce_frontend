@@ -16,7 +16,7 @@ export interface Brand {
 export const BrandApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Add new brand
-    addNewBrand: builder.mutation<Brand, Partial<Brand>>({
+    addNewBrand: builder.mutation({
       query: (data) => ({
         url: `/brand`,
         method: "POST",

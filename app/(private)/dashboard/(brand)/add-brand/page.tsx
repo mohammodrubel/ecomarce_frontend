@@ -7,10 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X, Upload } from "lucide-react";
 import { RichTextEditor } from "@/components/Editor";
+import { useAddNewBrandMutation } from "@/redux/fetchers/brand/brandApi";
+import { toast } from "sonner";
+import { BrandResponse } from "@/lib/Types";
 
 function Page() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [addNewBrand] = useAddNewBrandMutation()
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -35,19 +39,38 @@ function Page() {
     setPreview(null);
   };
 
-  const handleSubmit = () => {
-    console.log("Form Submitted:", {
-      ...formData,
-      file,
-    });
-    // 👉 send this data to your API
+const handleSubmit = async () => {
+  if (!file) {
+    alert("Please upload a file");
+    return;
+  }
+
+  const mainData = {
+    name: formData.name,
+    description: formData.description,
   };
+
+  const form = new FormData();
+  form.append("data", JSON.stringify(mainData));
+  form.append("file", file);
+
+  try {
+    const res: BrandResponse = await addNewBrand(form).unwrap();
+
+    if (res.success) {
+      toast.success(res.message);
+    }
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Something went wrong");
+  }
+};
+
 
   return (
     <div className="mx-auto p-6">
       <Card className="container mx-auto shadow-lg rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Add Product</CardTitle>
+          <CardTitle className="text-xl font-semibold">Add Brand</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Upload Photo */}
