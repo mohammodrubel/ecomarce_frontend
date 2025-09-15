@@ -1,3 +1,4 @@
+import { useGetSingleSpecialOfferQuery } from "@/redux/fetchers/special-offer/specialOffer";
 import { SpecialOffer } from "./SpecialOffer";
 import {
   Carousel,
@@ -32,12 +33,12 @@ export function SpecialOfferSlider() {
 
         {/* Navigation buttons - hidden on mobile, shown on md+ */}
         <CarouselPrevious
-          className="left-1 hidden md:flex"
+          className="left-1 bg-white text-black hover:bg-white hover:text-black hidden md:flex"
           variant="default"
           size="default"
         />
         <CarouselNext
-          className="right-1 hidden md:flex"
+          className="right-1  bg-white text-black hover:bg-white hover:text-black hidden md:flex"
           variant="default"
           size="default"
         />

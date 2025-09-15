@@ -227,7 +227,7 @@ console.log('brand info')
                 />
               </TableCell>
               <TableCell>{item.name}</TableCell>
-              <TableCell>{item.description}</TableCell>
+              <TableCell>{item.description.slice(0,50)}</TableCell>
               <TableCell>{new Date(item.createdAt).toLocaleString()}</TableCell>
               <TableCell>{new Date(item.updatedAt).toLocaleString()}</TableCell>
               <TableCell>

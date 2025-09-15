@@ -39,14 +39,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Best Sellers", href: "/shop/bestsellers" },
     ]
   },
-  { 
-    label: "Categories", 
-    subItems: [
-      { label: "Electronics", href: "/categories/electronics" },
-      { label: "Clothing", href: "/categories/clothing" },
-      { label: "Home & Garden", href: "/categories/home-garden" },
-    ]
-  },
+
   { 
     label: "Account",
     subItems: [
