@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+---
 
-First, run the development server:
+## **USER Endpoints**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/auth/login` | POST | Authenticate a user and retrieve a token | Login with registered email and password |
+| `/auth/register` | GET | Register a new user | Open the registration form or endpoint |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## **CATEGORY Endpoints**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/category` | POST | Create a new category | Include category name, subcategories, and an image |
+| `/category` | GET | Retrieve all categories | List of all categories |
+| `/category/:id` | GET | Retrieve details of a single category | Fetch category by its ID |
+| `/category/:id` | PUT | Update a category by ID | Change subcategories or other properties |
 
-## Learn More
+> Replace `:id` with the actual category UUID.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## **BRAND Endpoints**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/brand` | POST | Create a new brand | Include brand name, description, and image |
+| `/brand/:id` | PATCH | Update brand image | Upload a new brand image |
+| `/brand/:id` | PATCH | Edit brand data | Update brand information such as description |
+| `/brand` | GET | Retrieve all brands | List of all brands |
+| `/brand/:id` | GET | Retrieve a single brand by ID | Fetch brand details by ID |
 
-## Deploy on Vercel
+> Replace `:id` with the actual brand UUID.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## **PRODUCT Endpoints**
+
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/products` | POST | Create a new product | Include product details, images, category and brand references |
+| `/products` | GET | Retrieve all products | List of all products |
+| `/products/:id` | GET | Retrieve a single product by ID | Fetch product details by its ID |
+
+> Replace `:id` with the actual product UUID.
+
+---
+
+## **SPECIAL OFFER Endpoints**
+
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/special-offer` | GET | Create or retrieve special offers | Fetch all current offers or create a new one |
+
+---
+
+## Notes
+
+- Replace `:id` in endpoints with the actual UUID of the resource.
+- File uploads must be sent as **form-data**.
+- Use the **Postman collection** for testing requests quickly.
+- Responses are returned in **JSON format**, including success/failure messages.
+
+---
+
+## Example Usage
+
+### Login
+- **Description:** Authenticate a user.
+- **Example:** Send POST request to `/auth/login` with email and password. You will receive an authentication token.
+
+### Create Category
+- **Description:** Add a new category with optional subcategories and an image.
+- **Example:** Send POST request to `/category` with category name, subcategories, and file upload.
+
+### Create Product
+- **Description:** Add a new product with details, images, category, and brand references.
+- **Example:** Send POST request to `/products` with product information and multiple images.
+
+### Update Brand Image
+- **Description:** Update the image for a brand.
+- **Example:** Send PATCH request to `/brand/:id` with new image file.
+
+### Get All Products
+- **Description:** Retrieve all available products.
+- **Example:** Send GET request to `/products` to fetch a list of all products.
+
+---
+
+This version is **clean, readable, and professional** for GitHub — no raw JSON is included, only clear descriptions and examples.  
+
+---
+
+I can also make an **even cleaner GitHub version with collapsible sections for each resource** so it looks like official documentation.  
+
+Do you want me to do that next?
