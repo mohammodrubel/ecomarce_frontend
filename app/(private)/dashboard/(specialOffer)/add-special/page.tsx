@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, ImageIcon, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
-// import { useGetAllProductQuery } from "@/redux/fetchers/productApi/productApi"; // Make sure you have this API
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useGetAllProductsQuery } from "@/redux/fetchers/products/productsApi";
+import { useAddSpecialOfferMutation } from "@/redux/fetchers/special-offer/specialOffer";
 
 export default function AddSpecialOffer() {
   const [title, setTitle] = useState("");
@@ -21,10 +21,10 @@ export default function AddSpecialOffer() {
   const [validUntil, setValidUntil] = useState<Date | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const {data} = useGetAllProductsQuery(undefined)
-console.log(data)
+  const { data: products } = useGetAllProductsQuery(undefined);
+  const [AddSpecialOfferData] = useAddSpecialOfferMutation()
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // const { data: products } = useGetAllProductQuery(undefined);
   const router = useRouter();
 
   // --- Image Upload ---
@@ -52,7 +52,7 @@ console.log(data)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !productId || !validFrom) {
+    if (!title || !productId || !validFrom || !imageFile) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -80,8 +80,8 @@ console.log(data)
       //   router.push("/dashboard/special-offers");
       // }
 
-      console.log("FormData ready to submit:", formData);
-      toast.success("Special Offer submitted (mock)");
+      const res = AddSpecialOfferData(formData)
+      console.log(res)
     } catch (error: any) {
       toast.error(error?.data?.message || "Something went wrong");
     }
@@ -144,16 +144,6 @@ console.log(data)
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-
                 {/* Description */}
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
@@ -165,7 +155,7 @@ console.log(data)
                 </div>
 
                 {/* Product */}
-                {/* <div className="space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="product">Product *</Label>
                   <select
                     id="product"
@@ -181,7 +171,7 @@ console.log(data)
                       </option>
                     ))}
                   </select>
-                </div> */}
+                </div>
 
                 {/* Valid From */}
                 <div className="space-y-2">
