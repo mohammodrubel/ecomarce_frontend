@@ -80,7 +80,7 @@ export default function AddSpecialOffer() {
       //   router.push("/dashboard/special-offers");
       // }
 
-      const res = AddSpecialOfferData(formData)
+      const res =await AddSpecialOfferData(formData)
       console.log(res)
     } catch (error: any) {
       toast.error(error?.data?.message || "Something went wrong");
