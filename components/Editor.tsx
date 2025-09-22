@@ -9,6 +9,8 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+
+
 import {
   Bold,
   Italic,
@@ -28,6 +30,7 @@ import {
   Link as LinkIcon,
   Image as ImageIcon,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { useCallback } from "react";
 
@@ -39,6 +42,7 @@ interface RichTextEditorProps {
   editable?: boolean;
 }
 
+// ✅ Custom BackgroundColor extension
 const BackgroundColor = Extension.create({
   name: "backgroundColor",
   addGlobalAttributes() {
@@ -81,7 +85,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({
     disabled={disabled}
     className={cn(
       "p-2 rounded hover:bg-gray-100 transition-colors",
-      isActive && "bg-gray-100",
+      isActive && "bg-gray-200",
       disabled && "opacity-50 cursor-not-allowed"
     )}
   >
@@ -97,36 +101,21 @@ export function RichTextEditor({
   editable = true,
 }: RichTextEditorProps) {
   const editor = useEditor({
-    // FIX: Add immediatelyRender: false to prevent SSR hydration mismatches
-    immediatelyRender: false,
+    immediatelyRender: false, // ✅ Fix hydration issues in Next.js
     extensions: [
       StarterKit.configure({
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
+        bulletList: { keepMarks: true },
+        orderedList: { keepMarks: true },
       }),
       Underline,
-      TextAlign.configure({
-        types: ["paragraph", "heading"],
-      }),
-      Highlight.configure({
-        multicolor: true,
-      }),
+      TextAlign.configure({ types: ["paragraph", "heading"] }),
+      Highlight.configure({ multicolor: true }),
       TextStyle,
       Color,
       BackgroundColor,
-      Link.configure({
-        openOnClick: false,
-      }),
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-      }),
+      Link.configure({ openOnClick: false }),
+      Image.configure({ inline: true, allowBase64: true }),
+      // Placeholder.configure({ placeholder }), // ✅ Proper placeholder
     ],
     content,
     editable,
@@ -159,22 +148,11 @@ export function RichTextEditor({
     }
   };
 
-  const handleContainerClick = useCallback(
-    (e: React.MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.classList.contains("editor-container") ||
-        target.classList.contains("ProseMirror")
-      ) {
-        editor?.chain().focus().run();
-      }
-    },
-    [editor]
-  );
+  const handleContainerClick = useCallback(() => {
+    editor?.chain().focus().run();
+  }, [editor]);
 
-  if (!editor) {
-    return null;
-  }
+  if (!editor) return null;
 
   if (!editable) {
     return (
@@ -188,45 +166,41 @@ export function RichTextEditor({
     <div
       className={cn("border rounded-md editor-container", className)}
       onClick={handleContainerClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          handleContainerClick(e as unknown as React.MouseEvent);
-        }
-      }}
       role="textbox"
       tabIndex={0}
       aria-label="Rich Text Editor"
+      aria-multiline="true"
     >
       {/* Toolbar */}
-      <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white">
+      <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white sticky top-0 z-10">
         {/* Text Formatting */}
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-          isActive={editor?.isActive("bold")}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          isActive={editor.isActive("bold")}
         >
           <Bold className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-          isActive={editor?.isActive("italic")}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          isActive={editor.isActive("italic")}
         >
           <Italic className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleUnderline().run()}
-          isActive={editor?.isActive("underline")}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          isActive={editor.isActive("underline")}
         >
           <UnderlineIcon className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleStrike().run()}
-          isActive={editor?.isActive("strike")}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          isActive={editor.isActive("strike")}
         >
           <Strikethrough className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleHighlight().run()}
-          isActive={editor?.isActive("highlight")}
+          onClick={() => editor.chain().focus().toggleHighlight().run()}
+          isActive={editor.isActive("highlight")}
         >
           <Highlighter className="w-4 h-4" />
         </MenuButton>
@@ -235,26 +209,26 @@ export function RichTextEditor({
 
         {/* Text Alignment */}
         <MenuButton
-          onClick={() => editor?.chain().focus().setTextAlign("left").run()}
-          isActive={editor?.isActive({ textAlign: "left" })}
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          isActive={editor.isActive({ textAlign: "left" })}
         >
           <AlignLeft className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().setTextAlign("center").run()}
-          isActive={editor?.isActive({ textAlign: "center" })}
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          isActive={editor.isActive({ textAlign: "center" })}
         >
           <AlignCenter className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().setTextAlign("right").run()}
-          isActive={editor?.isActive({ textAlign: "right" })}
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          isActive={editor.isActive({ textAlign: "right" })}
         >
           <AlignRight className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().setTextAlign("justify").run()}
-          isActive={editor?.isActive({ textAlign: "justify" })}
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          isActive={editor.isActive({ textAlign: "justify" })}
         >
           <AlignJustify className="w-4 h-4" />
         </MenuButton>
@@ -263,14 +237,14 @@ export function RichTextEditor({
 
         {/* Lists */}
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-          isActive={editor?.isActive("bulletList")}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          isActive={editor.isActive("bulletList")}
         >
           <List className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-          isActive={editor?.isActive("orderedList")}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          isActive={editor.isActive("orderedList")}
         >
           <ListOrdered className="w-4 h-4" />
         </MenuButton>
@@ -279,22 +253,22 @@ export function RichTextEditor({
 
         {/* Other */}
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-          isActive={editor?.isActive("blockquote")}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          isActive={editor.isActive("blockquote")}
         >
           <Quote className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-          isActive={editor?.isActive("codeBlock")}
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          isActive={editor.isActive("codeBlock")}
         >
           <Code className="w-4 h-4" />
         </MenuButton>
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Links and Images */}
-        <MenuButton onClick={addLink} isActive={editor?.isActive("link")}>
+        {/* Links & Images */}
+        <MenuButton onClick={addLink} isActive={editor.isActive("link")}>
           <LinkIcon className="w-4 h-4" />
         </MenuButton>
         <MenuButton onClick={addImage}>
@@ -303,16 +277,16 @@ export function RichTextEditor({
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Undo/Redo */}
+        {/* Undo / Redo */}
         <MenuButton
-          onClick={() => editor?.chain().focus().undo().run()}
-          disabled={!editor?.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
         >
           <Undo className="w-4 h-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor?.chain().focus().redo().run()}
-          disabled={!editor?.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
         >
           <Redo className="w-4 h-4" />
         </MenuButton>
@@ -320,7 +294,7 @@ export function RichTextEditor({
 
       {/* Editor Content */}
       <div className="min-h-[200px] [&_.ProseMirror]:min-h-[200px] [&_.ProseMirror]:outline-none [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:ml-4 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:ml-4">
-        <EditorContent editor={editor}  placeholder={placeholder} />
+        <EditorContent editor={editor} />
       </div>
     </div>
   );
