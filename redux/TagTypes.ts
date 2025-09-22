@@ -3,7 +3,15 @@ export const tagTypes = {
   category: "category",
   brand:"brand",
   product:"product",
-  specialoffer:"special-offer"
+  specialoffer:"special-offer",
+  slider:"slider"
 };
 
-export const tagTypesList = [tagTypes.user, tagTypes.category,tagTypes.brand,tagTypes.product,tagTypes.specialoffer];
+export const tagTypesList = [
+  tagTypes.user,
+  tagTypes.category,
+  tagTypes.brand,
+  tagTypes.product,
+  tagTypes.specialoffer,
+  tagTypes.slider,
+];

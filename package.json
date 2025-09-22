@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.2.1",
+    "@hookform/resolvers": "^5.2.2",
     "@lexical/list": "^0.34.0",
     "@lexical/react": "^0.34.0",
     "@lexical/rich-text": "^0.34.0",
@@ -71,7 +71,7 @@
     "react-datepicker": "^8.7.0",
     "react-day-picker": "^9.9.0",
     "react-dom": "^19.1.1",
-    "react-hook-form": "^7.62.0",
+    "react-hook-form": "^7.63.0",
     "react-redux": "^9.2.0",
     "react-resizable-panels": "^3.0.4",
     "recharts": "^3.1.2",
@@ -81,7 +81,7 @@
     "tailwind-variants": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "zod": "^4.0.17"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
