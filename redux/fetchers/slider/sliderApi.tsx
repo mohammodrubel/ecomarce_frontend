@@ -42,16 +42,7 @@ export const sliderApi = baseApi.injectEndpoints({
       invalidatesTags: [tagTypes.slider],
     }),
 
-    // Update image
-    updateSliderImage: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `/slider/${id}/image`,
-        method: "PUT",
-        body: data,
-      }),
-      invalidatesTags: [tagTypes.slider],
-    }),
-
+  
     // Delete
     deleteSlider: builder.mutation({
       query: (id: string) => ({
@@ -68,6 +59,5 @@ export const {
   useGetAllSlidersQuery,
   useGetSingleSliderQuery,
   useUpdateSliderMutation,
-  useUpdateSliderImageMutation,
   useDeleteSliderMutation,
 } = sliderApi;
