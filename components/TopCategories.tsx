@@ -81,7 +81,7 @@ function TopCategories() {
                   alt={category.name}
                   width={80}
                   height={80}
-                  className="mx-auto mb-4"
+                  className="mx-auto mb-4 rounded-2xl"
                 />
                 <h3 className="font-semibold mb-2">{category.name}</h3>
               </CardContent>

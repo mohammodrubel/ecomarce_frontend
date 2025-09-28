@@ -26,13 +26,12 @@ import { Category } from "@/lib/Types";
 function DesktopSidebar() {
   const { isLoading, isError, data } = useGetAllCategoryQuery(undefined);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const mainData = data?.data;
+  const mainData = data?.data.slice(0, 8);
 
   if (isLoading) {
     return (
       <aside className="relative w-64 bg-white shadow-lg min-h-auto hidden lg:block rounded-lg">
         <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4 px-2">Categories</h2>
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="relative mb-2">
               <div className="w-full p-3 h-auto rounded-lg flex items-center justify-between">
@@ -53,7 +52,6 @@ function DesktopSidebar() {
     return (
       <aside className="relative w-64 bg-white shadow-lg min-h-auto hidden lg:block rounded-lg">
         <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4 px-2">Categories</h2>
           <div className="text-center p-4 text-red-500">
             Failed to load categories
           </div>
@@ -65,7 +63,7 @@ function DesktopSidebar() {
   return (
     <aside className="relative w-64 bg-white shadow-lg min-h-auto hidden lg:block rounded-lg">
       <div className="p-4">
-        <h2 className="text-lg font-semibold mb-4 px-2">Categories</h2>
+        {/* <h2 className="text-lg font-semibold mb-4 px-2">Categories</h2> */}
         {mainData?.map((category: Category) => (
           <div
             key={category.name}
@@ -135,7 +133,7 @@ function DesktopSidebar() {
 function MobileSidebar() {
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const { isLoading, isError, data } = useGetAllCategoryQuery(undefined);
-  const mainData = data?.data;
+  const mainData = data?.data.slice(0,8);
 
   if (isLoading) {
     return (

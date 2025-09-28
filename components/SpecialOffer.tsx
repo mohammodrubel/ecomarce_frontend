@@ -3,17 +3,17 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { useGetSingleSpecialOfferQuery } from "@/redux/fetchers/special-offer/specialOffer";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// 🟠 Countdown Hook
+// ⏳ Countdown Hook
 function useCountdown(validUntil?: string | null) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
+    expired: false,
   });
 
   useEffect(() => {
@@ -32,8 +32,15 @@ function useCountdown(validUntil?: string | null) {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        setTimeLeft({ days, hours, minutes, seconds });
+        setTimeLeft({ days, hours, minutes, seconds, expired: false });
       } else {
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          expired: true,
+        });
         clearInterval(timer);
       }
     }, 1000);
@@ -44,54 +51,29 @@ function useCountdown(validUntil?: string | null) {
   return timeLeft;
 }
 
-export function SpecialOffer() {
-  const { data, isLoading } = useGetSingleSpecialOfferQuery(undefined);
-  const offer = data?.data?.[0]; // single special offer
+// 🟠 Special Offer Card
+export function SpecialOffer({ offer }: { offer: any }) {
   const timeLeft = useCountdown(offer?.validUntil);
 
-  if (isLoading) {
+  if (!offer) {
     return (
-      <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white border-0">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold">
-            <Skeleton className="h-6 w-40 bg-white/20" />
-          </CardTitle>
-          <Skeleton className="h-4 w-60 mt-2 bg-white/20" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Countdown Skeleton */}
-          <div className="grid grid-cols-4 gap-2 text-center">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full rounded bg-white/20" />
-            ))}
-          </div>
-
-          {/* Product Skeleton */}
-          <div className="bg-white/10 rounded-lg p-4 space-y-3">
-            <Skeleton className="h-24 w-full rounded bg-white/20" />
-            <Skeleton className="h-5 w-32 bg-white/20" />
-            <Skeleton className="h-8 w-24 bg-white/20" />
-            <Skeleton className="h-2 w-full bg-white/20" />
-          </div>
-        </CardContent>
+      <Card className="p-6 text-center">
+        <Skeleton className="h-6 w-40 mb-4" />
+        <Skeleton className="h-24 w-full rounded" />
       </Card>
     );
-  }
-
-  if (!offer) {
-    return <p className="text-center text-gray-500">No special offer found.</p>;
   }
 
   return (
     <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white border-0">
       <CardHeader>
         <CardTitle className="text-xl font-bold">{offer.title}</CardTitle>
-        <p className="text-orange-100 text-sm">{offer.description}</p>
+        <p className="text-orange-100 text-sm">{offer.description?.slice(0,30)}</p>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Countdown Timer */}
-        {offer.validUntil && (
+        {/* Countdown */}
+        {offer.validUntil && !timeLeft.expired ? (
           <div className="grid grid-cols-4 gap-2 text-center">
             <div className="bg-white/20 rounded p-2">
               <div className="text-lg font-bold">
@@ -118,13 +100,17 @@ export function SpecialOffer() {
               <div className="text-xs">Sec</div>
             </div>
           </div>
+        ) : (
+          <div className="text-center text-lg font-semibold bg-white/20 p-2 rounded">
+            Offer Ended
+          </div>
         )}
 
-        {/* Product */}
+        {/* Product Info */}
         <div className="bg-white/10 rounded-lg p-4">
           <div className="relative mb-3">
             <Image
-              src={offer.image || offer.product?.images?.[0] || "/fallback.png"}
+              src={offer.product?.images?.[0] || "/fallback.png"}
               alt={offer.product?.name || offer.title}
               width={200}
               height={120}

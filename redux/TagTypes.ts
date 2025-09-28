@@ -1,10 +1,11 @@
 export const tagTypes = {
   user: "user",
   category: "category",
-  brand:"brand",
-  product:"product",
-  specialoffer:"special-offer",
-  slider:"slider"
+  brand: "brand",
+  product: "product",
+  specialoffer: "special-offer",
+  slider: "slider",
+  banner: "banner",
 };
 
 export const tagTypesList = [
@@ -14,4 +15,5 @@ export const tagTypesList = [
   tagTypes.product,
   tagTypes.specialoffer,
   tagTypes.slider,
+  tagTypes.banner,
 ];
