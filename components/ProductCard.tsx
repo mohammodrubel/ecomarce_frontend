@@ -150,13 +150,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 : "opacity-0 translate-y-4"
             }`}
           >
-            {product.colors.map((color, index) => (
-              <div
-                key={index}
-                className="w-6 h-6 rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform duration-200"
-                style={{ backgroundColor: color }}
-              />
-            ))}
+          
           </div>
 
           {/* Add to Cart Button Slide Up */}
@@ -202,24 +196,6 @@ export default function ProductCard({ product }: { product: Product }) {
                 {Math.round((1 - product.price / product.originalPrice) * 100)}%
                 OFF
               </span>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-4">
-            <div className="flex justify-between text-xs mb-1">
-              <span className={progressData.soldTextColor}>
-                {progressData.soldText}
-              </span>
-              <span className={progressData.availableTextColor}>
-                {progressData.availableText}
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${progressData.progressColor}`}
-                style={{ width: `${progressData.soldPercentage}%` }}
-              />
             </div>
           </div>
         </div>
