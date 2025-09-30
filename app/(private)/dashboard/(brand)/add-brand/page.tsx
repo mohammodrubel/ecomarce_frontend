@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,28 +12,22 @@ import { useAddNewBrandMutation } from "@/redux/fetchers/brand/brandApi";
 import { toast } from "sonner";
 import { BrandResponse } from "@/lib/Types";
 
-function Page() {
+const Page: React.FC = () => {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [addNewBrand] = useAddNewBrandMutation()
+  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [addNewBrand] = useAddNewBrandMutation();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-  });
-
-  // handle input fields
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
-    }
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (!selectedFile) return;
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
   };
 
   const removeFile = () => {
@@ -40,36 +35,27 @@ function Page() {
     setPreview(null);
   };
 
-const handleSubmit = async () => {
-  if (!file) {
-    alert("Please upload a file");
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!file) return toast.error("Please upload a file");
 
-  const mainData = {
-    name: formData.name,
-    description: formData.description,
+    const form = new FormData();
+    form.append("data", JSON.stringify(formData));
+    form.append("file", file);
+
+    try {
+      const res: BrandResponse = await addNewBrand(form).unwrap();
+      if (res.success) {
+        toast.success(res.message);
+        router.push("/dashboard/brand"); // Redirect after successful submit
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong");
+    }
   };
 
-  const form = new FormData();
-  form.append("data", JSON.stringify(mainData));
-  form.append("file", file);
-
-  try {
-    const res: BrandResponse = await addNewBrand(form).unwrap();
-
-    if (res.success) {
-      toast.success(res.message);
-    }
-  } catch (error: any) {
-    toast.error(error?.data?.message || "Something went wrong");
-  }
-};
-
-
   return (
-    <div className="mx-auto p-6">
-      <Card className="container mx-auto shadow-lg rounded-2xl">
+    <div className="mx-auto p-6 max-w-3xl">
+      <Card className="shadow-lg rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Add Brand</CardTitle>
         </CardHeader>
@@ -81,13 +67,13 @@ const handleSubmit = async () => {
               {!preview ? (
                 <>
                   <Upload className="text-muted-foreground mb-2 h-8 w-8" />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground text-center">
                     Drag & drop or click to upload
                   </p>
                   <Input
+                    id="photo"
                     type="file"
                     className="hidden"
-                    id="photo"
                     onChange={handleFileChange}
                   />
                   <Label
@@ -118,11 +104,11 @@ const handleSubmit = async () => {
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Brand Name</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Enter name"
+              placeholder="Enter brand name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
             />
@@ -132,8 +118,8 @@ const handleSubmit = async () => {
           <div className="space-y-2">
             <Label>Description</Label>
             <RichTextEditor
-              onChange={(val: string) => handleInputChange("description", val)}
-              placeholder="Start writing your product description..."
+              placeholder="Start writing your brand description..."
+              onChange={(val) => handleInputChange("description", val)}
             />
           </div>
 
@@ -144,6 +130,6 @@ const handleSubmit = async () => {
       </Card>
     </div>
   );
-}
+};
 
 export default Page;

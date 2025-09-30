@@ -68,7 +68,9 @@ export function SpecialOffer({ offer }: { offer: any }) {
     <Card className="bg-gradient-to-br from-orange-500 to-red-600 text-white border-0">
       <CardHeader>
         <CardTitle className="text-xl font-bold">{offer.title}</CardTitle>
-        <p className="text-orange-100 text-sm">{offer.description?.slice(0,30)}</p>
+        <p className="text-orange-100 text-sm">
+          {offer.description?.slice(0, 30)}
+        </p>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -108,35 +110,18 @@ export function SpecialOffer({ offer }: { offer: any }) {
 
         {/* Product Info */}
         <div className="bg-white/10 rounded-lg p-4">
-          <div className="relative mb-3">
+          <div className="relative w-[150] mx-auto aspect-square mb-3">
             <Image
               src={offer.product?.images?.[0] || "/fallback.png"}
               alt={offer.product?.name || offer.title}
-              width={200}
-              height={120}
-              className="w-full h-24 object-cover rounded"
+              width={150}
+              height={150}
+              className="object-contain rounded"
             />
-            <div className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded">
-              {offer.discountPercentage ?? "10"}%
-            </div>
           </div>
-
           <h3 className="font-semibold mb-2">{offer.product?.name}</h3>
           <div className="text-2xl font-bold mb-3">
             ${offer.price ?? "239.00"}
-          </div>
-
-          {/* Stock Progress */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Available: {offer.available ?? 100}</span>
-            </div>
-            <Progress
-              value={
-                offer.sold ? (offer.sold / (offer.available || 100)) * 100 : 0
-              }
-              className="h-2 bg-white/20"
-            />
           </div>
         </div>
       </CardContent>

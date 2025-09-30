@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Filter, Grid, List, Star } from "lucide-react";
+import { Filter, Star } from "lucide-react";
 import ProductCard from "../../../components/ProductCard";
-import ProductTableRow from "../../../components/ProductTableRow";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -36,7 +35,6 @@ export interface Product {
 }
 
 export default function ShopPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [loading, setLoading] = useState(true);
 
@@ -227,32 +225,6 @@ export default function ShopPage() {
     </div>
   );
 
-  const ProductTableRowSkeleton = () => (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100 animate-pulse">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-        <div className="lg:col-span-2 flex items-center gap-3">
-          <div className="h-16 w-16 bg-gray-200 rounded-lg"></div>
-          <div className="h-4 w-20 bg-gray-200 rounded"></div>
-        </div>
-        <div className="lg:col-span-3 space-y-2">
-          <div className="h-4 w-32 bg-gray-200 rounded"></div>
-          <div className="h-3 w-24 bg-gray-200 rounded"></div>
-        </div>
-        <div className="lg:col-span-2 space-y-2">
-          <div className="h-4 w-20 bg-gray-200 rounded"></div>
-          <div className="h-3 w-16 bg-gray-200 rounded"></div>
-        </div>
-        <div className="lg:col-span-2">
-          <div className="h-5 w-16 bg-gray-200 rounded"></div>
-        </div>
-        <div className="lg:col-span-3 flex gap-2">
-          <div className="h-9 w-9 bg-gray-200 rounded-lg"></div>
-          <div className="h-9 w-24 bg-gray-200 rounded-lg"></div>
-        </div>
-      </div>
-    </div>
-  );
-
   const products = [
     {
       id: 1,
@@ -379,51 +351,15 @@ export default function ShopPage() {
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                   <div className="h-9 w-48 bg-gray-200 rounded-lg animate-pulse"></div>
-                  <div className="flex bg-gray-100 rounded-xl p-1">
-                    <div className="h-8 w-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                    <div className="h-8 w-8 bg-gray-200 rounded-lg animate-pulse ml-1"></div>
-                  </div>
                 </div>
               </div>
 
               {/* Products Grid Skeleton */}
-              {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-                  {[...Array(8)].map((_, index) => (
-                    <ProductCardSkeleton key={index} />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Table Header Skeleton */}
-                  <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100">
-                    {[...Array(6)].map((_, index) => (
-                      <div
-                        key={index}
-                        className="h-4 bg-gray-200 rounded animate-pulse"
-                        style={{
-                          gridColumn: `span ${
-                            index === 0
-                              ? 2
-                              : index === 1
-                              ? 3
-                              : index === 2
-                              ? 2
-                              : index === 3
-                              ? 2
-                              : 3
-                          }`,
-                        }}
-                      ></div>
-                    ))}
-                  </div>
-
-                  {/* Table Rows Skeleton */}
-                  {[...Array(6)].map((_, index) => (
-                    <ProductTableRowSkeleton key={index} />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                {[...Array(8)].map((_, index) => (
+                  <ProductCardSkeleton key={index} />
+                ))}
+              </div>
 
               {/* Pagination Skeleton */}
               <div className="flex justify-center mt-8 md:mt-12">
@@ -506,94 +442,14 @@ export default function ShopPage() {
                     <SelectItem value="newest">Newest</SelectItem>
                   </SelectContent>
                 </Select>
-
-                <div className="flex bg-gray-100 rounded-xl p-1">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className="rounded-lg transition-all duration-300"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className="rounded-lg transition-all duration-300"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
               </div>
             </div>
 
-            {/* Products Grid/Table */}
-            {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-                {products.map((product: Product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Table Header */}
-                <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100">
-                  <div className="lg:col-span-2 font-semibold text-gray-700">
-                    Product
-                  </div>
-                  <div className="lg:col-span-3 font-semibold text-gray-700">
-                    Details
-                  </div>
-                  <div className="lg:col-span-2 font-semibold text-gray-700">
-                    Info
-                  </div>
-                  <div className="lg:col-span-2 font-semibold text-gray-700">
-                    Price
-                  </div>
-                  <div className="lg:col-span-3 font-semibold text-gray-700">
-                    Actions
-                  </div>
-                </div>
-
-                {/* Table Rows */}
-                {products.map((product) => (
-                  <ProductTableRow key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-8 md:mt-12">
-              <div className="flex flex-wrap gap-2 bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-sm border border-gray-100">
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-gray-200 hover:border-blue-200 hover:bg-blue-50"
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-gray-200 hover:border-blue-200 hover:bg-blue-50"
-                >
-                  1
-                </Button>
-                <Button className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 border-0 shadow-lg">
-                  2
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-gray-200 hover:border-blue-200 hover:bg-blue-50"
-                >
-                  3
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-gray-200 hover:border-blue-200 hover:bg-blue-50"
-                >
-                  Next
-                </Button>
-              </div>
+            {/* Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+              {products.map((product: Product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           </div>
         </div>

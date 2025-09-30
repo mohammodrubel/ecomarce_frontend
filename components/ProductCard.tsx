@@ -8,120 +8,184 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+// Updated interface to match your actual data structure
 export interface Product {
-  id: number | string;
+  id: string;
   name: string;
+  description: string;
+  subcategory: string;
   price: number;
   originalPrice: number;
-  image: any;
-  hoverImage: any;
-  rating: number;
-  reviews: number;
-  badge: string;
-  category: string;
-  colors: string[];
-  features: string[];
+  discountType: string | null;
+  discountValue: number | null;
+  discountStart: string | null;
+  discountEnd: string | null;
   stock: number;
   sku: string;
+  brandId: string;
+  categoryId: string;
+  images: string[];
+  rating: number;
+  reviewsCount: number;
+  badge: string;
+  inStock: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  category?: {
+    id: string;
+    name: string;
+    icon: string;
+    subcategories: string[];
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  brand?: {
+    id: string;
+    logo: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
-export default function ProductCard({ product }: { product: Product }) {
-  const [hoveredProduct, setHoveredProduct] = useState<number>();
+interface ProductCardProps {
+  product: Product;
+}
 
-  // Calculate progress bar values based on stock
-  const calculateProgress = () => {
-    if (product.stock === 0) {
+export default function ProductCard({ product }: ProductCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Safe image handling with optional chaining
+  const images = product?.images || [];
+  const mainImage = images[0] || "/placeholder.svg";
+  const hoverImage = images[1] || images[0] || "/placeholder.svg";
+
+  // Calculate discount percentage safely
+  const discountPercentage =
+    product?.originalPrice > product?.price
+      ? Math.round(
+          ((product.originalPrice - product.price) / product.originalPrice) *
+            100
+        )
+      : 0;
+
+  // Stock status calculation with safe defaults
+  const getStockStatus = () => {
+    const stock = product?.stock || 0;
+    const inStock = product?.inStock ?? true;
+
+    if (stock === 0 || !inStock) {
       return {
-        soldPercentage: 100,
-        availablePercentage: 0,
+        status: "out-of-stock",
+        text: "Out of Stock",
+        color: "text-red-600",
+        bgColor: "bg-red-100",
+        progress: 100,
         progressColor: "from-red-500 to-red-600",
-        soldTextColor: "text-red-600",
-        availableTextColor: "text-red-500",
-        soldText: "Sold Out",
-        availableText: "0%",
       };
-    } else if (product.stock <= 10) {
-      const soldPercentage = Math.min(
-        95,
-        Math.round(((50 - product.stock) / 50) * 100)
-      );
+    } else if (stock <= 10) {
+      const progress = Math.min(95, ((50 - stock) / 50) * 100);
       return {
-        soldPercentage,
-        availablePercentage: 100 - soldPercentage,
+        status: "low-stock",
+        text: `Only ${stock} left`,
+        color: "text-orange-600",
+        bgColor: "bg-orange-100",
+        progress,
         progressColor: "from-orange-400 to-orange-500",
-        soldTextColor: "text-orange-600",
-        availableTextColor: "text-orange-500",
-        soldText: `Sold: ${soldPercentage}%`,
-        availableText: `Low Stock`,
       };
     } else {
-      const soldPercentage = 72; // Default value
       return {
-        soldPercentage,
-        availablePercentage: 28,
+        status: "in-stock",
+        text: `In Stock`,
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        progress: 72,
         progressColor: "from-green-400 to-blue-500",
-        soldTextColor: "text-green-600",
-        availableTextColor: "text-blue-500",
-        soldText: `Sold: ${soldPercentage}%`,
-        availableText: `Available: ${product.stock}`,
       };
     }
   };
 
-  const progressData = calculateProgress();
+  const stockStatus = getStockStatus();
+
+  // Safe product data with fallbacks
+  const productName = product?.name || "Unnamed Product";
+  const productPrice = product?.price || 0;
+  const originalPrice = product?.originalPrice || productPrice;
+  const productRating = product?.rating || 0;
+  const reviewsCount = product?.reviewsCount || 0;
+  const productBadge = product?.badge || "";
+  const productId = product?.id || "";
 
   return (
     <Card
-      className="group relative overflow-hidden bg-gradient-to-br from-white py-0 to-gray-50/80 hover:from-gray-50 hover:to-white border-0 shadow-sm hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2"
-      onMouseEnter={() => setHoveredProduct(product.id)}
-      onMouseLeave={() => setHoveredProduct(null)}
+      className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50/80 py-0 hover:from-gray-50 hover:to-white border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-500 ease-out hover:-translate-y-1"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Background Glow Effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <CardContent className="p-0 relative">
-        {/* Image Container with Advanced Hover Effects */}
+        {/* Image Container */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-          <Link href={`/product/${product.id}`}>
-            <div className="relative h-80 w-full">
+          <Link href={`/product/${productId}`}>
+            <div className="relative h-72 w-full cursor-pointer">
               {/* Main Image */}
               <Image
-                src={product.image || "/placeholder.svg"}
-                alt={product.name}
+                src={mainImage}
+                alt={productName}
                 width={400}
                 height={400}
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
-                  hoveredProduct === product.id
-                    ? "opacity-0 scale-110 rotate-2"
-                    : "opacity-100 scale-100 rotate-0"
+                  isHovered && images.length > 1
+                    ? "opacity-0 scale-110"
+                    : "opacity-100 scale-100"
                 }`}
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder.svg";
+                }}
               />
 
-              {/* Hover Image */}
-              <Image
-                src={product.hoverImage || "/placeholder.svg"}
-                alt={product.name}
-                width={400}
-                height={400}
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
-                  hoveredProduct === product.id
-                    ? "opacity-100 scale-100 -rotate-2"
-                    : "opacity-0 scale-90 rotate-0"
-                }`}
-              />
+              {/* Hover Image (if available) */}
+              {images.length > 1 && (
+                <Image
+                  src={hoverImage}
+                  alt={productName}
+                  width={400}
+                  height={400}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
+                    isHovered ? "opacity-100 scale-100" : "opacity-0 scale-90"
+                  }`}
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
+                />
+              )}
             </div>
           </Link>
 
-          {/* Badge with Animation */}
-          <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 border-0 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <Zap className="w-3 h-3 mr-1" />
-            {product.badge}
-          </Badge>
+          {/* Badge */}
+          {productBadge && (
+            <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 border-0 text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+              <Zap className="w-3 h-3 mr-1" />
+              {productBadge}
+            </Badge>
+          )}
+
+          {/* Discount Badge */}
+          {discountPercentage > 0 && (
+            <Badge className="absolute top-3 right-3 bg-green-500 border-0 text-white shadow-lg">
+              {discountPercentage}% OFF
+            </Badge>
+          )}
 
           {/* Quick Actions */}
           <div
-            className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-500 ${
-              hoveredProduct === product.id
+            className={`absolute top-12 right-3 flex flex-col gap-2 transition-all duration-500 ${
+              isHovered
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 translate-x-4"
             }`}
@@ -142,66 +206,105 @@ export default function ProductCard({ product }: { product: Product }) {
             </Button>
           </div>
 
-          {/* Color Options */}
-          <div
-            className={`absolute bottom-3 left-3 flex gap-2 transition-all duration-500 ${
-              hoveredProduct === product.id
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-          >
-          
-          </div>
-
-          {/* Add to Cart Button Slide Up */}
+          {/* Add to Cart Button */}
           <div
             className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent transition-all duration-500 ${
-              hoveredProduct === product.id
+              isHovered
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-4"
             }`}
           >
             <Button
               className={`w-full ${
-                product.stock === 0
-                  ? "bg-gray-400 text-white cursor-not-allowed"
+                stockStatus.status === "out-of-stock"
+                  ? "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed"
                   : "bg-white text-black hover:bg-white/90 hover:scale-105"
               } transition-all duration-300 shadow-lg border-0`}
-              disabled={product.stock === 0}
+              disabled={stockStatus.status === "out-of-stock"}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+              {stockStatus.status === "out-of-stock"
+                ? "Out of Stock"
+                : "Add to Cart"}
             </Button>
           </div>
         </div>
 
         {/* Product Info */}
-        <div className="p-6">
-          <Link href={`/product/${product.id}`}>
-            <h3 className="font-bold text-lg mb-2 hover:text-primary transition-colors duration-300 line-clamp-2">
-              {product.name}
+        <div className="p-4">
+          {/* Category */}
+          {product?.category?.name && (
+            <p className="text-xs text-gray-500 mb-1 capitalize">
+              {product.category.name}
+            </p>
+          )}
+
+          {/* Product Name */}
+          <Link href={`/product/${productId}`}>
+            <h3 className="font-semibold text-base mb-2 hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight">
+              {productName}
             </h3>
           </Link>
 
+          {/* Brand */}
+          {product?.brand?.name && (
+            <p className="text-sm text-gray-600 mb-2">{product.brand.name}</p>
+          )}
+
+          {/* Rating */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${
+                    i < Math.floor(productRating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "fill-gray-300 text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500">
+              ({reviewsCount} reviews)
+            </span>
+          </div>
+
           {/* Price */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ${product.price}
+              <span className="text-xl font-bold text-gray-900">
+                ${productPrice}
               </span>
-              <span className="text-sm text-gray-500 line-through">
-                ${product.originalPrice}
-              </span>
-              <span className="text-xs font-medium bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                {Math.round((1 - product.price / product.originalPrice) * 100)}%
-                OFF
+              {originalPrice > productPrice && (
+                <span className="text-sm text-gray-500 line-through">
+                  ${originalPrice}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Stock Status */}
+          <div className="mt-2">
+            <div className="flex justify-between text-xs mb-1">
+              <span className={`font-medium ${stockStatus.color}`}>
+                {stockStatus.text}
               </span>
             </div>
+            {/* Progress Bar - Only show for low stock */}
+            {stockStatus.status === "low-stock" && (
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className={`h-1.5 rounded-full bg-gradient-to-r ${stockStatus.progressColor}`}
+                  style={{ width: `${stockStatus.progress}%` }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Hover Border Effect */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-200 rounded-lg transition-all duration-500 pointer-events-none" />
+        <div className="absolute inset-0  border-transparent group-hover:border-blue-200 rounded-lg transition-all duration-500 pointer-events-none" />
       </CardContent>
     </Card>
   );

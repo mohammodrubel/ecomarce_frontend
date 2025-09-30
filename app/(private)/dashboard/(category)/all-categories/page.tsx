@@ -72,89 +72,80 @@ export default function CategoriesPage() {
               <CardTitle>All Categories</CardTitle>
             </CardHeader>
             <CardContent>
-              {categories.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">No categories yet</p>
-                  <Link href="/categories/manage">
-                    <Button>Create First Category</Button>
-                  </Link>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Icon</TableHead>
-                      <TableHead>Subcategories</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categories.map((category: any) => (
-                      <TableRow key={category.id}>
-                        <TableCell className="font-medium">
-                          {category.name}
-                        </TableCell>
-                        <TableCell>
-                          {category.icon ? (
-                            <img
-                              src={category.icon}
-                              alt={category.name}
-                              className="h-8 w-8 object-contain"
-                            />
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {category.subcategories?.length > 0 ? (
-                              category.subcategories.map(
-                                (subcategory: string, index: number) => (
-                                  <Badge
-                                    key={index}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {subcategory}
-                                  </Badge>
-                                )
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Icon</TableHead>
+                    <TableHead>Subcategories</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {categories.map((category: any) => (
+                    <TableRow key={category.id}>
+                      <TableCell className="font-medium">
+                        {category.name}
+                      </TableCell>
+                      <TableCell>
+                        {category.icon ? (
+                          <img
+                            src={category.icon}
+                            alt={category.name}
+                            className="h-8 w-8 object-contain"
+                          />
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {category.subcategories?.length > 0 ? (
+                            category.subcategories.map(
+                              (subcategory: string, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {subcategory}
+                                </Badge>
                               )
-                            ) : (
-                              <span className="text-muted-foreground text-sm">
-                                None
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(category.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/dashboard/all-categories/${category.id}`}
-                            >
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                            <Button
-                              onClick={() => handleDelete(category.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
+                            )
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              None
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(category.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/dashboard/all-categories/${category.id}`}
+                          >
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
                             </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+                          </Link>
+                          <Button
+                            onClick={() => handleDelete(category.id)}
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
