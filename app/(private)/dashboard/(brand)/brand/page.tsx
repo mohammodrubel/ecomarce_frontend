@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,242 +10,140 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { RichTextEditor } from "@/components/Editor";
+import { Plus, Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  useGetAllBrandQuery,
-  useUpdateBrandImageMutation,
-  useUpdateBrandMutation,
   useDeleteBrandMutation,
-  Brand,
+  useGetAllBrandQuery,
 } from "@/redux/fetchers/brand/brandApi";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
+export default function BrandsPage() {
+  const { isLoading, isError, data } = useGetAllBrandQuery(undefined);
+  const [removeBrand] = useDeleteBrandMutation();
 
-function EditBrandModal({
-  item,
-  onSave,
-}: {
-  item: Brand;
-  onSave: (updatedItem: Brand) => void;
-}) {
-  const [changeBrandImage] = useUpdateBrandImageMutation();
-  const [updateBrandInformation] = useUpdateBrandMutation();
-
-  const [name, setName] = useState(item.name);
-  const [description, setDescription] = useState(item.description);
-  const [isOpen, setIsOpen] = useState(false);
-
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Handle logo upload
-  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      try {
-        const formData = new FormData();
-        formData.append("file", e.target.files[0]);
-
-        const updated:any = await changeBrandImage({
-          id: item.id,
-          data: formData,
-        }).unwrap();
-
-        toast.success(updated?.message);
-        onSave(updated.data); 
-      } catch (error) {
-        console.error("Failed to update brand logo:", error);
-      }
-    }
-  };
-
-  // Handle info update
-  const handleUpdate = async () => {
-    const data = {
-      name,
-      description,
-    };
-
-    try {
-      const updated: any = await updateBrandInformation({
-        id: item.id,
-        data,
-      }).unwrap();
-
-      toast.success(updated?.message);
-      onSave(updated.data); 
-      setIsOpen(false);
-     
-    } catch (error) {
-      console.error("Failed to update brand:", error);
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="mr-2">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Brand</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-6">
-          {/* Logo */}
-          <div className="space-y-2">
-            <Label>Brand Logo</Label>
-            <div className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/30 transition">
-              <Image
-                src={item.logo}
-                alt={item.name}
-                width={100}
-                height={100}
-                className="rounded-lg mb-4"
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleLogoChange}
-              />
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Change Logo
-              </Button>
-            </div>
-          </div>
-
-          {/* Name */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Brand Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              type="text"
-              placeholder="Enter brand name"
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <RichTextEditor
-              onChange={setDescription}
-              placeholder="Start writing your brand description..."
-            />
-          </div>
-
-          <Button className="w-full" onClick={handleUpdate}>
-            Update Brand
-          </Button>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading brands...</p>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ====================
-// Main Page
-// ====================
-export default function Page() {
-  const { data: brandsData, isLoading, error, refetch } = useGetAllBrandQuery();
-  const [deleteBrand] = useDeleteBrandMutation();
-  const [items, setItems] = useState<Brand[]>([]);
-console.log('brand info')
-  useEffect(() => {
-    if (brandsData?.data) {
-      setItems(brandsData.data);
-    }
-  }, [brandsData]);
-
-  const handleSave = (updatedItem: Brand) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+      </div>
     );
-    refetch();
-  };
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-red-500">Failed to load brands</p>
+      </div>
+    );
+  }
+
+  const brands = data?.data || [];
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteBrand(id).unwrap();
-      setItems((prev) => prev.filter((item) => item.id !== id));
-      refetch();
-    } catch (error) {
-      console.error("Failed to delete brand:", error);
+      const res = await removeBrand(id).unwrap();
+      if (res?.success) {
+        // toast.success(res?.message);
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong!");
     }
   };
 
-  if (isLoading) {
-    return <div className="p-6">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6">Error loading brands</div>;
-  }
-
   return (
-    <div className="p-6">
-      <Table className="border rounded-lg">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Logo</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead>Updated At</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <Image
-                  src={item.logo}
-                  alt={item.name}
-                  width={50}
-                  height={50}
-                  className="rounded-lg"
-                />
-              </TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.description.slice(0,50)}</TableCell>
-              <TableCell>{new Date(item.createdAt).toLocaleString()}</TableCell>
-              <TableCell>{new Date(item.updatedAt).toLocaleString()}</TableCell>
-              <TableCell>
-                <EditBrandModal item={item} onSave={handleSave} />
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDelete(item.id)}
-                  className="ml-2"
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Brands</h1>
+            <Link href="/dashboard/add-brands">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Brand
+              </Button>
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>All Brands</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Logo</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {brands.map((brand: any) => (
+                    <TableRow key={brand.id}>
+                      <TableCell>
+                        {brand.logo ? (
+                          <Image
+                            src={brand.logo}
+                            alt={brand.name}
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 object-contain rounded-lg"
+                          />
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {brand.name}
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-[300px]">
+                          {brand.description ? (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {brand.description.replace(/<[^>]*>/g, "")}
+                            </p>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              No description
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(brand.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link href={`/dashboard/brand/${brand.id}`}>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            onClick={() => handleDelete(brand.id)}
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

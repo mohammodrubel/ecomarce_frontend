@@ -9,7 +9,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-
+import { useCallback, useEffect } from "react"; // Just add useEffect
 
 import {
   Bold,
@@ -32,7 +32,6 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { useCallback } from "react";
 
 interface RichTextEditorProps {
   content?: string;
@@ -40,9 +39,10 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   editable?: boolean;
+  initialValue?: string; // Just add this new prop
 }
 
-// ✅ Custom BackgroundColor extension
+// ✅ Custom BackgroundColor extension (keep your existing extension)
 const BackgroundColor = Extension.create({
   name: "backgroundColor",
   addGlobalAttributes() {
@@ -99,9 +99,10 @@ export function RichTextEditor({
   placeholder = "Start writing...",
   className,
   editable = true,
+  initialValue = "", // Add this new prop
 }: RichTextEditorProps) {
   const editor = useEditor({
-    immediatelyRender: false, // ✅ Fix hydration issues in Next.js
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bulletList: { keepMarks: true },
@@ -115,9 +116,8 @@ export function RichTextEditor({
       BackgroundColor,
       Link.configure({ openOnClick: false }),
       Image.configure({ inline: true, allowBase64: true }),
-      // Placeholder.configure({ placeholder }), // ✅ Proper placeholder
     ],
-    content,
+    content: initialValue || content, // Use initialValue if provided
     editable,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
@@ -128,6 +128,13 @@ export function RichTextEditor({
       },
     },
   });
+
+  // Add this useEffect to handle initial value
+  useEffect(() => {
+    if (editor && initialValue && editor.isEmpty) {
+      editor.commands.setContent(initialValue);
+    }
+  }, [editor, initialValue]);
 
   const addLink = () => {
     const url = window.prompt("Enter URL:");
@@ -171,7 +178,7 @@ export function RichTextEditor({
       aria-label="Rich Text Editor"
       aria-multiline="true"
     >
-      {/* Toolbar */}
+      {/* Toolbar - KEEP ALL YOUR EXISTING DESIGN */}
       <div className="flex items-center flex-wrap gap-1 p-2 border-b bg-white sticky top-0 z-10">
         {/* Text Formatting */}
         <MenuButton
