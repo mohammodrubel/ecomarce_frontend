@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Filter, Star } from "lucide-react";
 import ProductCard from "../../../components/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -14,47 +14,64 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import imageOne from "../../../assts/apple.jpg";
-import imagetwo from "../../../assts/tv.png";
+import { useGetAllProductsQuery } from "@/redux/fetchers/products/productsApi";
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
+  description: string;
+  subcategory: string;
   price: number;
   originalPrice: number;
-  image: any;
-  hoverImage: any;
-  rating: number;
-  reviews: number;
-  badge: string;
-  category: string;
-  colors: string[];
-  features: string[];
+  discountType: string | null;
+  discountValue: number | null;
+  discountStart: string | null;
+  discountEnd: string | null;
   stock: number;
   sku: string;
+  brandId: string;
+  categoryId: string;
+  images: string[];
+  rating: number;
+  reviewsCount: number;
+  badge: string;
+  inStock: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  category?: {
+    id: string;
+    name: string;
+    icon: string;
+    subcategories: string[];
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  brand?: {
+    id: string;
+    logo: string;
+    name: string;
+    description: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export default function ShopPage() {
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, isError } = useGetAllProductsQuery(undefined);
+  const mainData = data?.data || [];
+  const [priceRange, setPriceRange] = useState([0, 5000]);
 
-  // Simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
+  // Extract unique categories and brands from actual data
   const categories = [
-    "Electronics",
-    "Fashion",
-    "Sports",
-    "Home",
-    "Books",
-    "Beauty",
-  ];
-  const brands = ["Apple", "Samsung", "Nike", "Adidas", "Sony", "LG"];
+    ...new Set(
+      mainData.map((product) => product.category?.name).filter(Boolean)
+    ),
+  ] as string[];
+  const brands = [
+    ...new Set(mainData.map((product) => product.brand?.name).filter(Boolean)),
+  ] as string[];
 
   const FilterSidebar = () => (
     <div className="space-y-6">
@@ -81,13 +98,13 @@ export default function ShopPage() {
           <Slider
             value={priceRange}
             onValueChange={setPriceRange}
-            max={1000}
-            step={10}
+            max={5000}
+            step={100}
             className="w-full"
           />
           <div className="flex justify-between text-sm text-gray-600">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span> ৳ {priceRange[0]}</span>
+            <span> ৳ {priceRange[1]}</span>
           </div>
         </div>
       </div>
@@ -141,8 +158,8 @@ export default function ShopPage() {
       <div>
         <div className="h-6 w-24 bg-gray-200 rounded mb-4 animate-pulse"></div>
         <div className="space-y-2">
-          {categories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center space-x-2">
               <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
               <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
             </div>
@@ -164,8 +181,8 @@ export default function ShopPage() {
       <div>
         <div className="h-6 w-24 bg-gray-200 rounded mb-4 animate-pulse"></div>
         <div className="space-y-2">
-          {brands.map((brand) => (
-            <div key={brand} className="flex items-center space-x-2">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center space-x-2">
               <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
               <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
             </div>
@@ -225,106 +242,25 @@ export default function ShopPage() {
     </div>
   );
 
-  const products = [
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      price: 99.99,
-      originalPrice: 129.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.5,
-      reviews: 128,
-      badge: "Best Seller",
-      category: "Electronics",
-      colors: ["#000000", "#FF6B6B", "#4ECDC4"],
-      features: ["Noise Cancelling", "30h Battery", "Fast Charge"],
-      stock: 45,
-      sku: "WH-001",
-    },
-    {
-      id: 2,
-      name: "Smart Watch Series X",
-      price: 199.99,
-      originalPrice: 249.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.8,
-      reviews: 89,
-      badge: "New",
-      category: "Electronics",
-      colors: ["#2C3E50", "#E74C3C", "#3498DB"],
-      features: ["Heart Rate", "GPS", "Waterproof"],
-      stock: 32,
-      sku: "SW-002",
-    },
-    {
-      id: 3,
-      name: "Premium Laptop Backpack",
-      price: 49.99,
-      originalPrice: 69.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.3,
-      reviews: 256,
-      badge: "Sale",
-      category: "Fashion",
-      colors: ["#1A1A1A", "#8B4513", "#2F4F4F"],
-      features: ["Waterproof", "Laptop Sleeve", "USB Charging"],
-      stock: 78,
-      sku: "BP-003",
-    },
-    {
-      id: 4,
-      name: "Bluetooth Speaker Pro",
-      price: 79.99,
-      originalPrice: 99.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.6,
-      reviews: 167,
-      badge: "Popular",
-      category: "Electronics",
-      colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"],
-      features: ["360° Sound", "24h Battery", "Party Mode"],
-      stock: 56,
-      sku: "SP-004",
-    },
-    {
-      id: 5,
-      name: "Running Shoes AirMax",
-      price: 89.99,
-      originalPrice: 119.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.4,
-      reviews: 203,
-      badge: "Sale",
-      category: "Sports",
-      colors: ["#E74C3C", "#2C3E50", "#27AE60"],
-      features: ["Air Cushion", "Breathable", "Lightweight"],
-      stock: 23,
-      sku: "SH-005",
-    },
-    {
-      id: 6,
-      name: "Smart Coffee Maker",
-      price: 149.99,
-      originalPrice: 199.99,
-      image: imageOne,
-      hoverImage: imagetwo,
-      rating: 4.7,
-      reviews: 145,
-      badge: "Popular",
-      category: "Home",
-      colors: ["#34495E", "#7F8C8D", "#16A085"],
-      features: ["WiFi Connect", "Programmable", "Grinder"],
-      stock: 67,
-      sku: "CM-006",
-    },
-  ];
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Failed to load products
+          </h2>
+          <p className="text-gray-600 mb-4">
+            There was an error loading the products. Please try again later.
+          </p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading) {
+  // Show skeleton loading while data is being fetched
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
         <div className="container mx-auto px-4 py-8">
@@ -419,7 +355,7 @@ export default function ShopPage() {
                 <span className="text-sm text-gray-600 font-medium whitespace-nowrap">
                   Showing{" "}
                   <span className="text-blue-600 font-bold">
-                    {products.length}
+                    {mainData.length}
                   </span>{" "}
                   products
                 </span>
@@ -446,11 +382,22 @@ export default function ShopPage() {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              {products.map((product: Product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {mainData.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No products found
+                </h3>
+                <p className="text-gray-600">
+                  There are no products available at the moment.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                {mainData.map((product: Product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
