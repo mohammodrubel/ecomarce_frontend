@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, Star } from "lucide-react";
+import { Filter, Star, Search } from "lucide-react";
 import ProductCard from "../../../components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -66,15 +67,26 @@ export default function ShopPage() {
   // Extract unique categories and brands from actual data
   const categories = [
     ...new Set(
-      mainData.map((product) => product.category?.name).filter(Boolean)
+      mainData.map((product: Product) => product.category?.name).filter(Boolean)
     ),
   ] as string[];
   const brands = [
-    ...new Set(mainData.map((product) => product.brand?.name).filter(Boolean)),
+    ...new Set(
+      mainData.map((product: Product) => product.brand?.name).filter(Boolean)
+    ),
   ] as string[];
 
   const FilterSidebar = () => (
     <div className="space-y-6">
+      {/* Search Input */}
+      <div>
+        <h3 className="font-semibold mb-4 text-lg">Search Products</h3>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input placeholder="Search products..." className="pl-10" />
+        </div>
+      </div>
+
       <div>
         <h3 className="font-semibold mb-4 text-lg">Categories</h3>
         <div className="space-y-2">

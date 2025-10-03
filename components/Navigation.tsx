@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Shop", 
     href: "/shop",
     subItems: [
-      { label: "All Products", href: "/shop/all" },
+      { label: "All Products", href: "/shop" },
       { label: "New Arrivals", href: "/shop/new" },
       { label: "Best Sellers", href: "/shop/bestsellers" },
     ]

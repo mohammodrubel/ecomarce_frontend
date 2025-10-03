@@ -63,14 +63,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   const mainImage = images[0] || "/placeholder.svg";
   const hoverImage = images[1] || images[0] || "/placeholder.svg";
 
-  // Calculate discount percentage safely
-  const discountPercentage =
-    product?.originalPrice > product?.price
-      ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) *
-            100
-        )
-      : 0;
+  // Calculate discount percentage safely - only show if there's a real discount
+  const hasDiscount = product?.originalPrice > product?.price;
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
+    : 0;
 
   // Stock status calculation with safe defaults
   const getStockStatus = () => {
@@ -167,20 +166,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           </Link>
 
-          {/* Badge */}
-          {productBadge && (
-            <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 border-0 text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
-              <Zap className="w-3 h-3 mr-1" />
-              {productBadge}
-            </Badge>
-          )}
+          {/* Top Right Badges */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2">
+            {/* Discount Badge - Only show if there's an actual discount */}
+            {hasDiscount && discountPercentage > 0 && (
+              <Badge className="bg-green-500 border-0 text-white shadow-lg">
+                {discountPercentage}% OFF
+              </Badge>
+            )}
 
-          {/* Discount Badge */}
-          {discountPercentage > 0 && (
-            <Badge className="absolute top-3 right-3 bg-green-500 border-0 text-white shadow-lg">
-              {discountPercentage}% OFF
-            </Badge>
-          )}
+            {/* Product Badge (NEW, etc.) - Only show if badge exists */}
+            {productBadge && (
+              <Badge className="bg-blue-500 border-0 text-white shadow-lg">
+                {productBadge}
+              </Badge>
+            )}
+          </div>
 
           {/* Quick Actions */}
           <div
@@ -232,13 +233,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Product Info */}
         <div className="p-4">
-          {/* Category */}
-          {product?.category?.name && (
-            <p className="text-xs text-gray-500 mb-1 capitalize">
-              {product.category.name}
-            </p>
-          )}
-
           {/* Product Name */}
           <Link href={`/product/${productId}`}>
             <h3 className="font-semibold text-base mb-2 hover:text-primary transition-colors duration-300 line-clamp-2 leading-tight">
@@ -251,55 +245,40 @@ export default function ProductCard({ product }: ProductCardProps) {
             <p className="text-sm text-gray-600 mb-2">{product.brand.name}</p>
           )}
 
-          {/* Rating */}
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(productRating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-300 text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-gray-500">
-              ({reviewsCount} reviews)
-            </span>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">
-                ${productPrice}
-              </span>
-              {originalPrice > productPrice && (
-                <span className="text-sm text-gray-500 line-through">
-                  ${originalPrice}
+          <div className="flex item-center justify-between">
+            {/* Price */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold text-gray-900">
+                  <b className="font-bold text-[30px] px-2">৳</b>
+                  {productPrice}
                 </span>
+                {hasDiscount && (
+                  <span className="text-sm text-gray-500 line-through">
+                    <b className="font-bold text-[30px] px-2">৳</b>
+                    {originalPrice}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Stock Status */}
+            <div className="mt-2">
+              <div className="flex justify-between text-xs mb-1">
+                <span className={`font-medium ${stockStatus.color}`}>
+                  {stockStatus.text}
+                </span>
+              </div>
+              {/* Progress Bar - Only show for low stock */}
+              {stockStatus.status === "low-stock" && (
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    className={`h-1.5 rounded-full bg-gradient-to-r ${stockStatus.progressColor}`}
+                    style={{ width: `${stockStatus.progress}%` }}
+                  />
+                </div>
               )}
             </div>
-          </div>
-
-          {/* Stock Status */}
-          <div className="mt-2">
-            <div className="flex justify-between text-xs mb-1">
-              <span className={`font-medium ${stockStatus.color}`}>
-                {stockStatus.text}
-              </span>
-            </div>
-            {/* Progress Bar - Only show for low stock */}
-            {stockStatus.status === "low-stock" && (
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div
-                  className={`h-1.5 rounded-full bg-gradient-to-r ${stockStatus.progressColor}`}
-                  style={{ width: `${stockStatus.progress}%` }}
-                />
-              </div>
-            )}
           </div>
         </div>
 
