@@ -29,6 +29,14 @@ export const CategoryApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.category],
     }),
 
+    GetAllCategoryForRelations: builder.query({
+      query: () => ({
+        url: "/category/forrelations",
+        method: "GET",
+      }),
+      providesTags: [tagTypes.category],
+    }),
+
     getSingleCategory: builder.query({
       query: (id) => ({
         url: `/category/${id}`,
@@ -52,5 +60,6 @@ export const {
   useUpdateCategoryMutation, 
   useGetAllCategoryQuery,
   useGetSingleCategoryQuery,
-  useDeleteCategoryMutation
+  useDeleteCategoryMutation,
+  useGetAllCategoryForRelationsQuery
 } = CategoryApi;

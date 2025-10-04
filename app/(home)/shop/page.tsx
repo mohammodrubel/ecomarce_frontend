@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useGetAllProductsQuery } from "@/redux/fetchers/products/productsApi";
+import { useGetAllCategoryForRelationsQuery } from "@/redux/fetchers/categoryApi/categoryApi";
+import { Category } from "@/lib/Types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface Product {
   id: string;
@@ -63,13 +66,9 @@ export default function ShopPage() {
   const { data, isLoading, isError } = useGetAllProductsQuery(undefined);
   const mainData = data?.data || [];
   const [priceRange, setPriceRange] = useState([0, 5000]);
+  const { data:CategoryData ,isLoading:category} = useGetAllCategoryForRelationsQuery(undefined)
 
-  // Extract unique categories and brands from actual data
-  const categories = [
-    ...new Set(
-      mainData.map((product: Product) => product.category?.name).filter(Boolean)
-    ),
-  ] as string[];
+  const radioOptions = CategoryData?.data?.map((item:Partial<Category>)=> ({name:item.name,value:item.id}))
   const brands = [
     ...new Set(
       mainData.map((product: Product) => product.brand?.name).filter(Boolean)
@@ -89,19 +88,61 @@ export default function ShopPage() {
 
       <div>
         <h3 className="font-semibold mb-4 text-lg">Categories</h3>
-        <div className="space-y-2">
-          {categories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
-              <Checkbox id={category} />
-              <label
-                htmlFor={category}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-primary cursor-pointer transition-colors"
-              >
-                {category}
-              </label>
-            </div>
-          ))}
-        </div>
+
+        {/* Loading Skeleton */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i}>
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="ml-6 mt-2 space-y-2">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="flex items-center space-x-2">
+                      <Skeleton className="h-3 w-3 rounded" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {radioOptions?.map((category: any) => (
+              <div key={category.id}>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id={category.id} />
+                  <label
+                    htmlFor={category.id}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-primary cursor-pointer transition-colors"
+                  >
+                    {category.name}
+                  </label>
+                </div>
+
+                {/* Subcategories */}
+                {category.subcategories?.length > 0 && (
+                  <div className="ml-6 mt-2 space-y-1">
+                    {category.subcategories.map((sub: string, idx: number) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <Checkbox id={`${category.id}-${idx}`} />
+                        <label
+                          htmlFor={`${category.id}-${idx}`}
+                          className="text-sm text-muted-foreground hover:text-primary cursor-pointer transition-colors"
+                        >
+                          {sub}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
@@ -132,31 +173,6 @@ export default function ShopPage() {
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 hover:text-primary cursor-pointer transition-colors"
               >
                 {brand}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-4 text-lg">Rating</h3>
-        <div className="space-y-2">
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <div key={rating} className="flex items-center space-x-2">
-              <Checkbox id={`rating-${rating}`} />
-              <label
-                htmlFor={`rating-${rating}`}
-                className="flex items-center text-sm hover:text-primary cursor-pointer transition-colors"
-              >
-                <div className="flex mr-2">
-                  {[...Array(rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-3 w-3 fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                </div>
-                & Up
               </label>
             </div>
           ))}
