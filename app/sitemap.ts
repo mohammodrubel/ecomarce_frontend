@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ecomarce-frontend.vercel.app";
 
 async function fetchProductSlugs(): Promise<
   { id: string; updatedAt?: string }[]
 > {
   try {
     const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000/api";
+      process.env.NEXT_PUBLIC_API_URL || "https://ecomarce-backend-xb8b.onrender.com/api";
     const res = await fetch(`${apiUrl}/products`, {
       next: { revalidate: 3600 },
     });
