@@ -3,7 +3,7 @@ import { RootState } from "../store";
 import { tagTypesList } from "../TagTypes";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://ecomarce-backend-7oba.onrender.com/api",
+  baseUrl: "https://ecomarce-backend-xb8b.onrender.com/api",
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
     const token = state.auth?.token;
